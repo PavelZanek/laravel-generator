@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Actions\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class Delete#className#ActionTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @return void
+     */
+    public function test_record_can_be_deleted(): void
+    {
+        $model = #className#::factory()->create();
+
+        $this->assertEquals(1, #className#::query()->count());
+
+        (new Delete#className#Action())->execute($model);
+
+        $this->assertEquals(0, #className#::query()->count());
+        $this->assertEquals(1, #className#::withTrashed()->count());
+        $this->assertNotNull($model->fresh()->deleted_at);
+    }
+}

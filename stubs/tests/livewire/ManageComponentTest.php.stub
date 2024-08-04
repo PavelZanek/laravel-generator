@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#\Manage#className#Component;
+use App\Models#classNamespace##className#;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class Manage#className#ComponentTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // $this->actingAs(User::factory()->withPersonalTeam()->create());
+    }
+
+    /**
+     * @return void
+     */
+    public function testComponentCanRender(): void
+    {
+        #className#::factory(10)->create();
+
+        Livewire::test(Manage#className#Component::class)
+            ->assertStatus(200)
+            ->assertViewIs('livewire.app#dottedClassNamespace##sluggedModelNamePlural#.manage-#sluggedModelNameSingular#-component');
+    }
+
+    /**
+     * @return void
+     */
+    public function testComponentCanSortItems(): void
+    {
+        $item1 = #className#::factory()->create([#className#::ATTR_CREATED_AT => now()->subDay()]);
+        $item2 = #className#::factory()->create([#className#::ATTR_CREATED_AT => now()]);
+
+        Livewire::test(Manage#className#Component::class)
+            ->call('sortBy', #className#::ATTR_CREATED_AT)
+            ->assertSeeInOrder([$item2->name, $item1->name]);
+    }
+
+    /**
+     * @return void
+     */
+    public function testComponentCanFilterItems(): void
+    {
+        $item1 = #className#::factory()->create([#className#::ATTR_STRING => 'Foo']);
+        $item2 = #className#::factory()->create([#className#::ATTR_STRING => 'Bar']);
+
+        Livewire::test(Manage#className#Component::class)
+            ->set('filters.'.#className#::ATTR_STRING, 'Foo')
+            ->assertSee($item1->string)
+            ->assertDontSee($item2->string);
+    }
+
+    /**
+     * @return void
+     */
+    public function testComponentCanDeleteAnItem(): void
+    {
+        $item = #className#::factory()->create();
+
+        Livewire::test(Manage#className#Component::class)
+            ->call('deleteItem', $item->id)
+            ->assertRedirect(route('#sluggedModelNamePlural#.index'));
+
+        $this->assertSoftDeleted('#dbTableName#', [#className#::ATTR_ID => $item->id]);
+    }
+}

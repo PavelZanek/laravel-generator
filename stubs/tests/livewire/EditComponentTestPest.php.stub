@@ -1,0 +1,74 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\ExampleEnum;
+use App\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#\Edit#className#Component;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // actingAs(User::factory()->withPersonalTeam()->create());
+});
+
+it('can render the component with data', function () {
+    $item = #className#::factory()->create();
+
+    Livewire::test(Edit#className#Component::class, ['#camelModelNameSingular#' => $item])
+        ->assertStatus(200)
+        ->assertViewIs('livewire.app#dottedClassNamespace##sluggedModelNamePlural#.edit-#sluggedModelNameSingular#-component')
+        ->assertSet('#camelModelNameSingular#', $item)
+        ->assertSet('form.formData.string', $item->string);
+});
+
+it('loads enum values', function () {
+    $item = #className#::factory()->create();
+
+    Livewire::test(Edit#className#Component::class, ['#camelModelNameSingular#' => $item])
+        ->assertViewHas('exampleEnums', ExampleEnum::all());
+});
+
+it('can update an item', function () {
+    $item = #className#::factory()->create();
+
+    $data = [
+        'formData' => [
+            #className#::ATTR_STRING => 'Example String',
+            #className#::ATTR_TEXT => 'Example Text',
+            #className#::ATTR_INTEGER => 42,
+            #className#::ATTR_BOOLEAN => true,
+            #className#::ATTR_ENUM => ExampleEnum::ENUM1->value,
+        ],
+    ];
+
+    Livewire::test(Edit#className#Component::class, ['#camelModelNameSingular#' => $item])
+        ->set('form.formData', $data['formData'])
+        ->call('save')
+        ->assertRedirect(route('#sluggedModelNamePlural#.index'));
+
+    $this->assertDatabaseHas('#dbTableName#', [
+        #className#::ATTR_ID => $item->id,
+        #className#::ATTR_STRING => 'Example String',
+        #className#::ATTR_TEXT => 'Example Text',
+        #className#::ATTR_INTEGER => 42,
+        #className#::ATTR_BOOLEAN => true,
+        #className#::ATTR_ENUM => ExampleEnum::ENUM1,
+    ]);
+});
+
+it('validates form inputs', function () {
+    $item = #className#::factory()->create();
+
+    Livewire::test(Edit#className#Component::class, ['#camelModelNameSingular#' => $item])
+        ->set('form.formData.' . #className#::ATTR_STRING, '')
+        ->call('save')
+        ->assertHasErrors(['form.formData.' . #className#::ATTR_STRING => 'required']);
+
+    Livewire::test(Edit#className#Component::class, ['#camelModelNameSingular#' => $item])
+        ->set('form.formData.' . #className#::ATTR_INTEGER, 'not-a-number')
+        ->call('save')
+        ->assertHasErrors(['form.formData.' . #className#::ATTR_INTEGER => 'integer']);
+});

@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Models#classNamespace##className#;
+
+class #actionType##className#Action
+{
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     */
+    public function execute(#className# $#camelModelNameSingular#): void
+    {
+        $#camelModelNameSingular#->delete();
+    }
+}

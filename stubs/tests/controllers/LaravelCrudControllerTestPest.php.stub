@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Action;
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Action;
+use App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Store#className#Request;
+use App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Request;
+use App\Models#classNamespace##className#;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // actingAs(User::factory()->withPersonalTeam()->create());
+});
+
+it('can display the index view', function () {
+    #className#::factory(10)->create();
+
+    $response = $this->get(route('#sluggedModelNamePlural#.index'));
+
+    $response->assertStatus(200)
+        ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.index');
+});
+
+it('can display the create view', function () {
+    $response = $this->get(route('#sluggedModelNamePlural#.create'));
+
+    $response->assertStatus(200)
+        ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.create');
+});
+
+it('can store a new record', function () {
+    $this->mock(Create#className#Action::class, function ($mock) {
+        $mock->shouldReceive('execute')->once();
+    });
+
+    $response = $this->post(route('#sluggedModelNamePlural#.store'), [
+        'string' => 'Example Name',
+        'text' => 'Example Text',
+    ]);
+
+    $response->assertRedirect(route('#sluggedModelNamePlural#.index'))
+        ->assertSessionHas('flashType', 'success');
+});
+
+it('can display the edit view', function () {
+    $model = #className#::factory()->create();
+
+    $response = $this->get(route('#sluggedModelNamePlural#.edit', $model));
+
+    $response->assertStatus(200)
+        ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.edit')
+        ->assertViewHas('#camelModelNameSingular#', $model);
+});
+
+it('can update a record', function () {
+    $model = #className#::factory()->create();
+
+    $this->mock(Update#className#Action::class, function ($mock) {
+        $mock->shouldReceive('execute')->once();
+    });
+
+    $response = $this->put(route('#sluggedModelNamePlural#.update', $model), [
+        'string' => 'Updated Name',
+        'text' => 'Updated Text',
+    ]);
+
+    $response->assertRedirect(route('#sluggedModelNamePlural#.index'))
+        ->assertSessionHas('flashType', 'success');
+});
+
+it('can delete a record', function () {
+    $model = #className#::factory()->create();
+
+    $this->mock(Delete#className#Action::class, function ($mock) {
+        $mock->shouldReceive('execute')->once();
+    });
+
+    $response = $this->delete(route('#sluggedModelNamePlural#.destroy', $model));
+
+    $response->assertRedirect(route('#sluggedModelNamePlural#.index'))
+        ->assertSessionHas('flashType', 'success');
+});

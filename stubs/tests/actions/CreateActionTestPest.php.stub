@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Action;
+use App\Enums\ExampleEnum;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+it('can create a record', function () {
+    $attributes = [
+        #className#::ATTR_STRING => fake()->sentence(),
+        #className#::ATTR_TEXT => fake()->realText(),
+        #className#::ATTR_INTEGER => fake()->numberBetween(1, 100),
+        #className#::ATTR_BOOLEAN => fake()->boolean(),
+        #className#::ATTR_ENUM => fake()->randomElement(ExampleEnum::cases())->value,
+    ];
+
+    $model = (new Create#className#Action())->execute($attributes);
+
+    expect($model->getString())->toBe($attributes[#className#::ATTR_STRING]);
+    expect($model->getText())->toBe($attributes[#className#::ATTR_TEXT]);
+    expect($model->getInteger())->toBe($attributes[#className#::ATTR_INTEGER]);
+    expect($model->getBoolean())->toBe($attributes[#className#::ATTR_BOOLEAN]);
+    expect($model->getEnum()->value)->toBe($attributes[#className#::ATTR_ENUM]);
+});

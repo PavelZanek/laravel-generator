@@ -1,0 +1,111 @@
+<?php
+
+return [
+    'index' => [
+        'title' => 'Items',
+        'headline' => 'Items',
+        'meta_description' => 'Meta Description',
+        'delete_confirm' => 'Are you sure?',
+    ],
+    'create' => [
+        'title' => 'Create Item',
+        'headline' => 'Create Item',
+        'meta_description' => 'Meta Description',
+    ],
+    'edit' => [
+        'title' => 'Edit Item',
+        'headline' => 'Edit Item',
+        'meta_description' => 'Meta Description',
+    ],
+    'button' => [
+        'save' => 'Save',
+        'add' => 'Add new item',
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+        'cancel' => 'Cancel',
+        'search' => 'Search',
+        'filter' => 'Filter',
+        'reset_filter' => 'Reset',
+    ],
+    'flash' => [
+        'created' => 'Item was successfully created.',
+        'updated' => 'Item was successfully updated.',
+        'deleted' => 'Item was successfully removed.',
+    ],
+    'enum' => [
+        'example' => [
+            'enum1' => 'Enum Name 1',
+            'enum2' => 'Enum Name 2',
+        ],
+    ],
+    'table' => [
+        'header' => [
+            'id' => 'ID',
+            'string' => 'String',
+            'integer' => 'Integer',
+            'boolean' => 'Boolean',
+            'enum' => 'Enum',
+            'created_at' => 'Created at',
+            'updated_at' => 'Updated at',
+            'action' => 'Action',
+        ],
+        'body' => [
+            'label_yes' => 'Yes',
+            'label_no' => 'No',
+        ],
+    ],
+    'form' => [
+        'label' => [
+            'string' => 'String',
+            'text' => 'Text',
+            'integer' => 'Integer',
+            'boolean' => 'Boolean',
+            'enum' => 'Enum',
+        ],
+        'value' => [
+            'select_enum' => 'Choose enum',
+        ],
+    ],
+    'request' => [
+        'store' => [
+            'string' => [
+                'required' => 'The string field is required.',
+                'string' => 'The string field must be a string.',
+            ],
+            'text' => [
+                'string' => 'The text field must be a string.',
+            ],
+            'integer' => [
+                'integer' => 'The integer field must be an integer.',
+            ],
+            'boolean' => [
+                'boolean' => 'The boolean field must be true or false.',
+            ],
+            'enum' => [
+                'string' => 'The enum field must be a string.',
+                'max' => 'The enum field may not be greater than :max characters.',
+                'enum' => 'The selected :attribute is invalid.',
+            ],
+        ],
+        'update' => [
+            'string' => [
+                'required' => 'The string field is required.',
+                'string' => 'The string field must be a string.',
+            ],
+            'text' => [
+                'string' => 'The text field must be a string.',
+            ],
+            'integer' => [
+                'integer' => 'The integer field must be an integer.',
+            ],
+            'boolean' => [
+                'boolean' => 'The boolean field must be true or false.',
+            ],
+            'enum' => [
+                'string' => 'The enum field must be a string.',
+                'max' => 'The enum field may not be greater than :max characters.',
+                'enum' => 'The selected :attribute is invalid.',
+            ],
+        ],
+    ],
+];

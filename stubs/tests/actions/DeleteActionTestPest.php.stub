@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+it('can delete a record', function () {
+    $model = #className#::factory()->create();
+
+    expect(#className#::query()->count())->toBe(1);
+
+    (new Delete#className#Action())->execute($model);
+
+    expect(#className#::query()->count())->toBe(0);
+    expect(#className#::withTrashed()->count())->toBe(1);
+    expect($model->fresh()->deleted_at)->not()->toBeNull();
+});

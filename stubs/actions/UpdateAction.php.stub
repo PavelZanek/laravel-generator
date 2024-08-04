@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Models#classNamespace##className#;
+
+class #actionType##className#Action
+{
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @param array<string, mixed> $data
+     * @return \App\Models#classNamespace##className#
+     */
+    public function execute(#className# $#camelModelNameSingular#, array $data): #className#
+    {
+        $#camelModelNameSingular#->update($data);
+        return $#camelModelNameSingular#;
+    }
+}

@@ -1,0 +1,99 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tables\App#classNamespaceWithoutEndingBackslash#;
+
+use App\Enums\ExampleEnum;
+use App\Models#classNamespace##className#;
+use PavelZanek\LaravelGenerator\Enums\TableFilters\FilterInputTypeEnum;
+use PavelZanek\LaravelGenerator\Enums\TableFilters\FilterOperatorEnum;
+use PavelZanek\LaravelGenerator\Enums\TableFilters\FilterTypeEnum;
+use PavelZanek\LaravelGenerator\Helpers\TableColumn;
+
+final readonly class #className#TableSettings
+{
+    /**
+     * @return array<string, \PavelZanek\LaravelGenerator\Helpers\TableColumn>
+     */
+    public static function getTableColumns(): array
+    {
+        return [
+           'id' => new TableColumn(
+               name: __('#translationPath#.table.header.id'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::EQUAL,
+               filterType: FilterTypeEnum::INPUT,
+               filterInputType: FilterInputTypeEnum::NUMBER,
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getId(),
+               wrapper: fn(#className# $#camelModelNameSingular#, mixed $value): string => '<a href="' . route('#sluggedModelNamePlural#.edit', $#camelModelNameSingular#->getId()) . '" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">' . $value . '</a>',
+           ),
+           'string' => new TableColumn(
+               name: __('#translationPath#.table.header.string'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::LIKE,
+               filterType: FilterTypeEnum::INPUT,
+               filterInputType: FilterInputTypeEnum::TEXT,
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getString(),
+           ),
+           'integer' => new TableColumn(
+               name: __('#translationPath#.table.header.integer'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::EQUAL,
+               filterType: FilterTypeEnum::INPUT,
+               filterInputType: FilterInputTypeEnum::NUMBER,
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getInteger(),
+           ),
+           'boolean' => new TableColumn(
+               name: __('#translationPath#.table.header.boolean'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::EQUAL,
+               filterType: FilterTypeEnum::SELECT,
+               filterSelectValues: [
+                  'not_set' => __('---'),
+                  '1' => __('app/first-namespace/second-namespace/example-item-translations.table.body.label_yes'),
+                  '0' => __('app/first-namespace/second-namespace/example-item-translations.table.body.label_no'),
+              ],
+               value: fn(#className# $#camelModelNameSingular#): string => $#camelModelNameSingular#->getBoolean()
+                    ? __('app/first-namespace/second-namespace/example-item-translations.table.body.label_yes')
+                    : __('app/first-namespace/second-namespace/example-item-translations.table.body.label_no'),
+           ),
+           'enum' => new TableColumn(
+               name: __('#translationPath#.table.header.enum'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::EQUAL,
+               filterType: FilterTypeEnum::SELECT,
+               filterSelectValues: ExampleEnum::allForFilter()->prepend('---', 'not_set')->toArray(),
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getEnum()?->details()['name'],
+           ),
+           'created_at' => new TableColumn(
+               name: __('#translationPath#.table.header.created_at'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::LIKE,
+               filterType: FilterTypeEnum::INPUT,
+               filterInputType: FilterInputTypeEnum::DATE,
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getCreatedAt()?->format('Y-m-d H:i'),
+           ),
+           'updated_at' => new TableColumn(
+               name: __('#translationPath#.table.header.updated_at'),
+               isSortable: true,
+               isFilterable: true,
+               filterOperator: FilterOperatorEnum::LIKE,
+               filterType: FilterTypeEnum::INPUT,
+               filterInputType: FilterInputTypeEnum::DATE,
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getUpdatedAt()?->format('Y-m-d H:i'),
+           ),
+           'action' => new TableColumn(
+               name: __('#translationPath#.table.header.action'),
+               isSortable: false,
+               isFilterable: false,
+           ),
+       ];
+    }
+}

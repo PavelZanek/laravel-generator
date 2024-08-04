@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Enums\ExampleEnum;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+
+class #requestType##className#Request extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<array-key, mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            #className#::ATTR_STRING => ['required', 'string'],
+            #className#::ATTR_TEXT => ['nullable', 'string'],
+            #className#::ATTR_INTEGER => ['nullable', 'integer'],
+            #className#::ATTR_BOOLEAN => ['nullable', 'boolean'],
+            #className#::ATTR_ENUM => [
+                'nullable',
+                'string',
+                'max:'.#className#::LIMIT_ENUM,
+                new Enum(ExampleEnum::class)
+            ],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            #className#::ATTR_STRING.'.required' => __('#translationPath#.request.store.'.#className#::ATTR_STRING.'.required'),
+            #className#::ATTR_STRING.'.string' => __('#translationPath#.request.store.'.#className#::ATTR_STRING.'.string'),
+            #className#::ATTR_TEXT.'.string' => __('#translationPath#.request.store.'.#className#::ATTR_TEXT.'.string'),
+            #className#::ATTR_INTEGER.'.integer' => __('#translationPath#.request.store.'.#className#::ATTR_INTEGER.'.integer'),
+            #className#::ATTR_BOOLEAN.'.boolean' => __('#translationPath#.request.store.'.#className#::ATTR_BOOLEAN.'.boolean'),
+            #className#::ATTR_ENUM.'.string' => __('#translationPath#.request.store.'.#className#::ATTR_ENUM.'.string'),
+            #className#::ATTR_ENUM.'.max' => __('#translationPath#.request.store.'.#className#::ATTR_ENUM.'.max'),
+            #className#::ATTR_ENUM.'.enum' => __('#translationPath#.request.store.'.#className#::ATTR_ENUM.'.enum'),
+        ];
+    }
+}

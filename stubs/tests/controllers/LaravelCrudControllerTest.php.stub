@@ -1,0 +1,120 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Controllers\App#classNamespaceWithoutEndingBackslash#;
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Action;
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Action;
+use App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Store#className#Request;
+use App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Request;
+use App\Enums\ExampleEnum;
+use App\Models#classNamespace##className#;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class #className#ControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // $this->actingAs(User::factory()->withPersonalTeam()->create());
+    }
+
+    /**
+     * @return void
+     */
+    public function testIndex(): void
+    {
+        #className#::factory(10)->create();
+
+        $this->get(route('#sluggedModelNamePlural#.index'))
+            ->assertStatus(200)
+            ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.index');
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreate(): void
+    {
+        $this->get(route('#sluggedModelNamePlural#.create'))
+            ->assertStatus(200)
+            ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.create');
+    }
+
+    /**
+     * @return void
+     */
+    public function testStore(): void
+    {
+        $this->mock(Create#className#Action::class, function ($mock) {
+            $mock->shouldReceive('execute')->once();
+        });
+
+        $response = $this->post(route('#sluggedModelNamePlural#.store'), [
+            'string' => 'Example Name',
+            'text' => 'Example Text',
+        ]);
+
+        $response->assertRedirect(route('#sluggedModelNamePlural#.index'))
+            ->assertSessionHas('flashType', 'success');
+    }
+
+    /**
+     * @return void
+     */
+    public function testEdit(): void
+    {
+        $model = #className#::factory()->create();
+
+        $this->get(route('#sluggedModelNamePlural#.edit', $model))
+            ->assertStatus(200)
+            ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.edit')
+            ->assertViewHas('#camelModelNameSingular#', $model);
+    }
+
+    /**
+     * @return void
+     */
+    public function testUpdate(): void
+    {
+        $model = #className#::factory()->create();
+
+        $this->mock(Update#className#Action::class, function ($mock) {
+            $mock->shouldReceive('execute')->once();
+        });
+
+        $response = $this->put(route('#sluggedModelNamePlural#.update', $model), [
+            'string' => 'Updated Name',
+            'text' => 'Updated Text',
+        ]);
+
+        $response->assertRedirect(route('#sluggedModelNamePlural#.index'))
+            ->assertSessionHas('flashType', 'success');
+    }
+
+    /**
+     * @return void
+     */
+    public function testDestroy(): void
+    {
+        $model = #className#::factory()->create();
+
+        $this->mock(Delete#className#Action::class, function ($mock) {
+            $mock->shouldReceive('execute')->once();
+        });
+
+        $this->delete(route('#sluggedModelNamePlural#.destroy', $model))
+            ->assertRedirect(route('#sluggedModelNamePlural#.index'))
+            ->assertSessionHas('flashType', 'success');
+    }
+}

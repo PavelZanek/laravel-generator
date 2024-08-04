@@ -1,0 +1,72 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Forms\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Action;
+use App\Enums\ExampleEnum;
+use App\Models#classNamespace##className#;
+use Illuminate\Validation\Rules\Enum;
+use Livewire\Form;
+
+class Edit#className#Form extends Form
+{
+    /**
+     * @var array<string, mixed>
+     */
+    public array $formData = [];
+
+    public function setFormData(#className# $#camelModelNameSingular#)
+    {
+        $this->formData = $#camelModelNameSingular#->toArray();
+    }
+
+    /**
+     * @return array<string, array<array-key, mixed>>
+     */
+    public function rules(): array
+    {
+        return [
+            'formData.'.#className#::ATTR_STRING => ['required', 'string'],
+            'formData.'.#className#::ATTR_TEXT => ['nullable', 'string'],
+            'formData.'.#className#::ATTR_INTEGER => ['nullable', 'integer'],
+            'formData.'.#className#::ATTR_BOOLEAN => ['nullable', 'boolean'],
+            'formData.'.#className#::ATTR_ENUM => [
+                'nullable',
+                'string',
+                'max:'.#className#::LIMIT_ENUM,
+                new Enum(type: ExampleEnum::class)
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'formData.'.#className#::ATTR_STRING.'.required' => __('#translationPath#.request.update.'.#className#::ATTR_STRING.'.required'),
+            'formData.'.#className#::ATTR_STRING.'.string' => __('#translationPath#.request.update.'.#className#::ATTR_STRING.'.string'),
+            'formData.'.#className#::ATTR_TEXT.'.string' => __('#translationPath#.request.update.'.#className#::ATTR_TEXT.'.string'),
+            'formData.'.#className#::ATTR_INTEGER.'.integer' => __('#translationPath#.request.update.'.#className#::ATTR_INTEGER.'.integer'),
+            'formData.'.#className#::ATTR_BOOLEAN.'.boolean' => __('#translationPath#.request.update.'.#className#::ATTR_BOOLEAN.'.boolean'),
+            'formData.'.#className#::ATTR_ENUM.'.string' => __('#translationPath#.request.update.'.#className#::ATTR_ENUM.'.string'),
+            'formData.'.#className#::ATTR_ENUM.'.max' => __('#translationPath#.request.update.'.#className#::ATTR_ENUM.'.max'),
+            'formData.'.#className#::ATTR_ENUM.'.enum' => __('#translationPath#.request.update.'.#className#::ATTR_ENUM.'.enum'),
+        ];
+    }
+
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function update(#className# $#camelModelNameSingular#): void
+    {
+        $validated = $this->validate();
+
+        (new Update#className#Action())->execute($#camelModelNameSingular#, $validated['formData']);
+    }
+}

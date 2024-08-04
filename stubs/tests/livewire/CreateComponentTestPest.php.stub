@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\ExampleEnum;
+use App\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Component;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // actingAs(User::factory()->withPersonalTeam()->create());
+});
+
+it('can render the component', function () {
+    Livewire::test(Create#className#Component::class)
+        ->assertStatus(200)
+        ->assertViewIs('livewire.app#dottedClassNamespace##sluggedModelNamePlural#.create-#sluggedModelNameSingular#-component');
+});
+
+it('loads enum values', function () {
+    Livewire::test(Create#className#Component::class)
+        ->assertViewHas('exampleEnums', ExampleEnum::all());
+});
+
+it('can create an item', function () {
+    $data = [
+        'formData' => [
+            #className#::ATTR_STRING => 'Example String',
+            #className#::ATTR_TEXT => 'Example Text',
+            #className#::ATTR_INTEGER => 42,
+            #className#::ATTR_BOOLEAN => true,
+            #className#::ATTR_ENUM => ExampleEnum::ENUM1->value,
+        ],
+    ];
+
+    Livewire::test(Create#className#Component::class)
+        ->set('form.formData', $data['formData'])
+        ->call('save')
+        ->assertRedirect(route('#sluggedModelNamePlural#.index'));
+
+    $this->assertDatabaseHas('#dbTableName#', [
+        #className#::ATTR_STRING => 'Example String',
+        #className#::ATTR_TEXT => 'Example Text',
+        #className#::ATTR_INTEGER => 42,
+        #className#::ATTR_BOOLEAN => true,
+        #className#::ATTR_ENUM => ExampleEnum::ENUM1,
+    ]);
+});
+
+it('validates form inputs', function () {
+    Livewire::test(Create#className#Component::class)
+        ->set('form.formData.' . #className#::ATTR_STRING, '')
+        ->call('save')
+        ->assertHasErrors(['form.formData.' . #className#::ATTR_STRING => 'required']);
+
+    Livewire::test(Create#className#Component::class)
+        ->set('form.formData.' . #className#::ATTR_INTEGER, 'not-a-number')
+        ->call('save')
+        ->assertHasErrors(['form.formData.' . #className#::ATTR_INTEGER => 'integer']);
+});

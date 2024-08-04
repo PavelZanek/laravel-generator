@@ -1,0 +1,139 @@
+<x-app-layout>
+    @section('pageTitle')
+        {{ __('#translationPath#.index.title') }}
+    @endsection
+    @section('metaDesc')
+        {{ __('#translationPath#.index.meta_description') }}
+    @endsection
+
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="font-semibold text-xl text-neutral-800 dark:text-neutral-50 leading-tight">
+                    {{ __('#translationPath#.index.headline') }}
+                </h1>
+            </div>
+            <div class="ml-2">
+                <a href="{{ route('#sluggedModelNamePlural#.create') }}"
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                    {{ __('#translationPath#.button.add') }}
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
+    <div class="py-6">
+        <div class="mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white rounded-lg dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+
+                <div class="relative overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                @foreach ($tableColumns as $column => $columnData)
+                                    <th scope="col" class="px-6 py-3">
+                                        @if($columnData->isSortable())
+                                            <a href="{{ route('#sluggedModelNamePlural#.index', \array_merge(request()->all(), ['sort' => $column, 'direction' => $sortColumn === $column && $sortDirection === 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+                                                {{ $columnData->getName() }}
+                                                @if ($sortColumn === $column)
+                                                    @if ($sortDirection === 'asc')
+                                                        &uarr;
+                                                    @else
+                                                        &darr;
+                                                    @endif
+                                                @endif
+                                            </a>
+                                        @else
+                                            {{ $columnData->getName() }}
+                                        @endif
+                                    </th>
+                                @endforeach
+                            </tr>
+                            <tr>
+                                <form method="GET" action="{{ route('#sluggedModelNamePlural#.index') }}">
+                                    <input type="hidden" name="sort" value="{{ $sortColumn }}">
+                                    <input type="hidden" name="direction" value="{{ $sortDirection }}">
+
+                                    @foreach ($tableColumns as $column => $columnData)
+                                        <th scope="col" class="px-6 py-3">
+                                            @if($column === 'action')
+                                                <div class="flex justify-start items-center gap-2">
+                                                    <button type="submit" class="text-white end-2.5 bottom-2.5 bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+                                                        {{ __('#translationPath#.button.filter') }}
+                                                    </button>
+                                                    <a href="{{ route('#sluggedModelNamePlural#.index') }}" class="capitalize text-white end-2.5 bottom-2.5 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
+                                                        {{ __('#translationPath#.button.reset_filter') }}
+                                                    </a>
+                                                </div>
+                                            @elseif($columnData->isFilterable())
+                                                @if($columnData->getFilterType()?->value === 'input')
+                                                    @if($columnData->getFilterInputType()?->value === 'number' || $columnData->getFilterInputType()?->value === 'text')
+                                                        <div class="flex items-center">
+                                                            <input type="{{ $columnData->getFilterInputType()?->value }}" name="filters[{{ $column }}]" id="filter-{{ $column }}" value="{{ $filters[$column] ?? '' }}" class="block w-full p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                                        </div>
+                                                    @elseif($columnData->getFilterInputType()?->value === 'date')
+                                                        <div class="flex items-center">
+                                                            <input type="date" name="filters[{{ $column }}]" id="filter-{{ $column }}" value="{{ $filters[$column] ?? '' }}" class="block w-full p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                                                        </div>
+                                                    @endif
+                                                @elseif($columnData->getFilterType()?->value === 'select')
+                                                    <div class="flex items-center">
+                                                        <select name="filters[{{ $column }}]" id="filter-{{ $column }}" class="block w-full p-2 text-sm text-gray-600 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-300 dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                            @foreach($columnData->getFilterSelectValues() as $value => $label)
+                                                                <option value="{{ $value }}" {{ isset($filters[$column]) && $filters[$column] == $value ? 'selected' : '' }}>
+                                                                    {{ $label }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                @endif
+                                            @endif
+                                        </th>
+                                    @endforeach
+                                </form>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($#camelModelNamePlural# as $#camelModelNameSingular#)
+                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                    @foreach ($tableColumns as $column => $columnData)
+                                        @if($column === 'action')
+                                            <td class="px-6 py-4">
+                                                <div class="flex justify-start items-center gap-2">
+                                                    <a href="{{ route('#sluggedModelNamePlural#.edit', $#camelModelNameSingular#->id) }}"
+                                                        class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                                                        {{ __('#translationPath#.button.edit') }}
+                                                    </a>
+                                                    <form action="{{ route('#sluggedModelNamePlural#.destroy', $#camelModelNameSingular#->id) }}" method="POST" onsubmit="return confirm('{{ __('#translationPath#.index.delete_confirm') }}');">
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                        <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                                                            {{ __('#translationPath#.button.delete') }}
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        @else
+                                            <td class="px-6 py-4">
+                                                @if($columnData->getWrapper())
+                                                    {!! $columnData->wrapValue($#camelModelNameSingular#, $columnData->getTemplateValue($#camelModelNameSingular#)) !!}
+                                                @else
+                                                    {{ $columnData->getTemplateValue($#camelModelNameSingular#) }}
+                                                @endif
+                                            </td>
+                                        @endif
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-5 mb-2 mx-3">
+                    {!! $#camelModelNamePlural#->withQueryString()->links() !!}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</x-app-layout>

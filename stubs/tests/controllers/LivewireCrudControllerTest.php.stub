@@ -1,0 +1,60 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Controllers\App#classNamespaceWithoutEndingBackslash#;
+
+use App\Models#classNamespace##className#;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class #className#ControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // $this->actingAs(User::factory()->withPersonalTeam()->create());
+    }
+
+    /**
+     * @return void
+     */
+    public function testIndex(): void
+    {
+        #className#::factory(10)->create();
+
+        $this->get(route('#sluggedModelNamePlural#.index'))
+            ->assertStatus(200)
+            ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.index');
+    }
+
+    /**
+     * @return void
+     */
+    public function testCreate(): void
+    {
+        $this->get(route('#sluggedModelNamePlural#.create'))
+            ->assertStatus(200)
+            ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.create');
+    }
+
+    /**
+     * @return void
+     */
+    public function testEdit(): void
+    {
+        $model = #className#::factory()->create();
+
+        $this->get(route('#sluggedModelNamePlural#.edit', $model))
+            ->assertStatus(200)
+            ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.edit')
+            ->assertViewHas('#camelModelNameSingular#', $model);
+    }
+}

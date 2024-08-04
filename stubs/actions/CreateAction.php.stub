@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Models#classNamespace##className#;
+
+class #actionType##className#Action
+{
+    /**
+     * @param array<string, mixed> $data
+     * @return \App\Models#classNamespace##className#
+     */
+    public function execute(array $data): #className#
+    {
+        return #className#::create($data);
+    }
+}

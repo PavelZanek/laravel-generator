@@ -1,0 +1,111 @@
+<?php
+
+return [
+    'index' => [
+        'title' => 'Položky',
+        'headline' => 'Položky',
+        'meta_description' => 'Meta Popis',
+        'delete_confirm' => 'Jste si jistý?',
+    ],
+    'create' => [
+        'title' => 'Vytvořit položku',
+        'headline' => 'Vytvořit položku',
+        'meta_description' => 'Meta Popis',
+    ],
+    'edit' => [
+        'title' => 'Upravit položku',
+        'headline' => 'Upravit položku',
+        'meta_description' => 'Meta Popis',
+    ],
+    'button' => [
+        'save' => 'Uložit',
+        'add' => 'Přidat novou položku',
+        'edit' => 'Upravit',
+        'delete' => 'Smazat',
+        'cancel' => 'Zrušit',
+        'search' => 'Hledat',
+        'filter' => 'Filtrovat',
+        'reset_filter' => 'Resetovat',
+    ],
+    'flash' => [
+        'created' => 'Položka byla úspěšně vytvořena.',
+        'updated' => 'Položka byla úspěšně aktualizována.',
+        'deleted' => 'Položka byla úspěšně odstraněna.',
+    ],
+    'enum' => [
+        'example' => [
+            'enum1' => 'Název Enumerátoru 1',
+            'enum2' => 'Název Enumerátoru 2',
+        ],
+    ],
+    'table' => [
+        'header' => [
+            'id' => 'ID',
+            'string' => 'Řetězec',
+            'integer' => 'Celé číslo',
+            'boolean' => 'Boolean',
+            'enum' => 'Enumerátor',
+            'created_at' => 'Vytvořeno',
+            'updated_at' => 'Aktualizováno',
+            'action' => 'Akce',
+        ],
+        'body' => [
+            'label_yes' => 'Ano',
+            'label_no' => 'Ne',
+        ],
+    ],
+    'form' => [
+        'label' => [
+            'string' => 'Řetězec',
+            'text' => 'Text',
+            'integer' => 'Celé číslo',
+            'boolean' => 'Boolean',
+            'enum' => 'Enumerátor',
+        ],
+        'value' => [
+            'select_enum' => 'Vyberte enumerátor',
+        ],
+    ],
+    'request' => [
+        'store' => [
+            'string' => [
+                'required' => 'Pole řetězec je povinné.',
+                'string' => 'Pole řetězec musí být řetězec.',
+            ],
+            'text' => [
+                'string' => 'Pole text musí být řetězec.',
+            ],
+            'integer' => [
+                'integer' => 'Pole celé číslo musí být celé číslo.',
+            ],
+            'boolean' => [
+                'boolean' => 'Pole boolean musí být pravda nebo nepravda.',
+            ],
+            'enum' => [
+                'string' => 'Pole enumerátor musí být řetězec.',
+                'max' => 'Pole enumerátor nesmí mít více než :max znaků.',
+                'enum' => 'Vybraný :attribute je neplatný.',
+            ],
+        ],
+        'update' => [
+            'string' => [
+                'required' => 'Pole řetězec je povinné.',
+                'string' => 'Pole řetězec musí být řetězec.',
+            ],
+            'text' => [
+                'string' => 'Pole text musí být řetězec.',
+            ],
+            'integer' => [
+                'integer' => 'Pole celé číslo musí být celé číslo.',
+            ],
+            'boolean' => [
+                'boolean' => 'Pole boolean musí být pravda nebo nepravda.',
+            ],
+            'enum' => [
+                'string' => 'Pole enumerátor musí být řetězec.',
+                'max' => 'Pole enumerátor nesmí mít více než :max znaků.',
+                'enum' => 'Vybraný :attribute je neplatný.',
+            ],
+        ],
+    ],
+];

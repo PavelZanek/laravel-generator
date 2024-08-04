@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models#classNamespace##className#;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    // actingAs(User::factory()->withPersonalTeam()->create());
+});
+
+it('can display the index view', function () {
+    #className#::factory(10)->create();
+
+    $response = $this->get(route('#sluggedModelNamePlural#.index'));
+
+    $response->assertStatus(200)
+        ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.index');
+});
+
+it('can display the create view', function () {
+    $response = $this->get(route('#sluggedModelNamePlural#.create'));
+
+    $response->assertStatus(200)
+        ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.create');
+});
+
+it('can display the edit view', function () {
+    $model = #className#::factory()->create();
+
+    $response = $this->get(route('#sluggedModelNamePlural#.edit', $model));
+
+    $response->assertStatus(200)
+        ->assertViewIs('app#dottedClassNamespace##sluggedModelNamePlural#.edit')
+        ->assertViewHas('#camelModelNameSingular#', $model);
+});

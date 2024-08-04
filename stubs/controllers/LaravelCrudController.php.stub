@@ -1,0 +1,149 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\App#classNamespaceWithoutEndingBackslash#;
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Action;
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Action;
+use App\Enums\ExampleEnum;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Store#className#Request;
+use App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Request;
+use App\Models#classNamespace##className#;
+use App\Tables\App#classNamespace##className#TableSettings;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use PavelZanek\LaravelGenerator\Enums\TableFilters\FilterTypeEnum;
+
+class #className#Controller extends Controller
+{
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index(Request $request): View
+    {
+        $sortColumn = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        $filters = $request->get('filters', []);
+        $tableColumns = #className#TableSettings::getTableColumns();
+
+        $#camelModelNamePlural# = #className#::query()
+            ->when($filters, function ($query, $filters) use ($tableColumns) {
+                foreach ($filters as $column => $value) {
+                    if ($value !== null && $value !== '') {
+                        $tableColumn = $tableColumns[$column];
+                        $operator = $tableColumn->getFilterOperator()?->value === 'equal' ? '=' : 'like';
+
+                        if (
+                            $tableColumn->getFilterType()?->value === FilterTypeEnum::SELECT->value
+                            && $tableColumn->getFilterSelectValues()
+                        ) {
+                            $value = $value === 'not_set' ? null : $value;
+                        }
+
+                        if ($value !== null) {
+                            $query->where($column, $operator, $operator === 'like' ? "%{$value}%" : $value);
+                        }
+                    }
+                }
+            })
+            ->orderBy($sortColumn, $sortDirection)
+            ->paginate(20);
+
+        return view('app#dottedClassNamespace##sluggedModelNamePlural#.index', [
+            '#camelModelNamePlural#' => $#camelModelNamePlural#,
+            'sortColumn' => $sortColumn,
+            'sortDirection' => $sortDirection,
+            'filters' => $filters,
+            'tableColumns' => $tableColumns,
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function create(): View
+    {
+        return view('app#dottedClassNamespace##sluggedModelNamePlural#.create', [
+            'exampleEnums' => ExampleEnum::all(),
+        ]);
+    }
+
+    /**
+     * @param \App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Store#className#Request $request
+     * @param \App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Action $action
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function store(Store#className#Request $request, Create#className#Action $action): RedirectResponse
+    {
+        $action->execute(
+            \array_merge($request->validated(), ['boolean' => $request->has('boolean')])
+        );
+
+        return redirect()->route('#sluggedModelNamePlural#.index')->with([
+            'flashType' => 'success',
+            'flashMessage' => __('#translationPath#.flash.created'),
+        ]);
+    }
+
+    // /**
+    //  * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+    //  * @return \Illuminate\Contracts\View\View
+    //  */
+    // public function show(#className# $#camelModelNameSingular#): View
+    // {
+    //     return view('app#dottedClassNamespace##sluggedModelNamePlural#.show', [
+    //         '#camelModelNameSingular#' => $#camelModelNameSingular#,
+    //     ]);
+    // }
+
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function edit(#className# $#camelModelNameSingular#): View
+    {
+        return view('app#dottedClassNamespace##sluggedModelNamePlural#.edit', [
+            '#camelModelNameSingular#' => $#camelModelNameSingular#,
+            'exampleEnums' => ExampleEnum::all(),
+        ]);
+    }
+
+    /**
+     * @param \App\Http\Requests\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Request $request
+     * @param \App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Action $action
+     * @param \App\Models\FirstNamespace\SecondNamespace\#className# $#camelModelNameSingular#
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Update#className#Request $request, Update#className#Action $action, #className# $#camelModelNameSingular#): RedirectResponse
+    {
+        $action->execute(
+            $#camelModelNameSingular#,
+            \array_merge($request->validated(), ['boolean' => $request->has('boolean')])
+        );
+
+        return redirect()->route('#sluggedModelNamePlural#.index')->with([
+            'flashType' => 'success',
+            'flashMessage' => __('#translationPath#.flash.updated'),
+        ]);
+    }
+
+    /**
+     * @param \App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action $action
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Delete#className#Action $action, #className# $#camelModelNameSingular#): RedirectResponse
+    {
+        $action->execute($#camelModelNameSingular#);
+
+        return redirect()->route('#sluggedModelNamePlural#.index')->with([
+            'flashType' => 'success',
+            'flashMessage' => __('#translationPath#.flash.deleted'),
+        ]);
+    }
+}

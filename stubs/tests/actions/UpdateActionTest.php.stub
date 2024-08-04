@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature\Actions\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Update#className#Action;
+use App\Enums\ExampleEnum;
+use App\Models#classNamespace##className#;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class Update#className#ActionTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @return void
+     */
+    public function test_record_can_be_updated(): void
+    {
+        $model = #className#::factory()->create([
+            #className#::ATTR_STRING => 'Test',
+        ]);
+
+        $attributes = [
+            #className#::ATTR_STRING => fake()->sentence(),
+            #className#::ATTR_TEXT => fake()->realText(),
+            #className#::ATTR_INTEGER => fake()->numberBetween(1, 100),
+            #className#::ATTR_BOOLEAN => fake()->boolean(),
+            #className#::ATTR_ENUM => fake()->randomElement(ExampleEnum::cases())->value,
+        ];
+
+        $model = (new Update#className#Action())->execute($model, $attributes);
+
+        $this->assertNotNull($model->getString());
+        $this->assertEquals($attributes[#className#::ATTR_STRING], $model->getString());
+        $this->assertNotNull($model->getText());
+        $this->assertEquals($attributes[#className#::ATTR_TEXT], $model->getText());
+        $this->assertNotNull($model->getInteger());
+        $this->assertEquals($attributes[#className#::ATTR_INTEGER], $model->getInteger());
+        $this->assertNotNull($model->getBoolean());
+        $this->assertEquals($attributes[#className#::ATTR_BOOLEAN], $model->getBoolean());
+        $this->assertNotNull($model->getEnum());
+        $this->assertEquals($attributes[#className#::ATTR_ENUM], $model->getEnum()->value);
+    }
+}

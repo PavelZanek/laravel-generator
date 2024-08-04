@@ -1,0 +1,4 @@
+
+// #className# Routes by Generator
+Route::resource('#sluggedModelNamePlural#', App\Http\Controllers\App#classNamespace##className#Controller::class)
+    ->only(['index', 'create', 'edit']);
