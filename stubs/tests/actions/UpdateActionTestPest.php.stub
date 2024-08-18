@@ -24,6 +24,8 @@ it('can update a record', function () {
 
     $model = (new Update#className#Action())->execute($model, $attributes);
 
+    $this->assertInstanceOf(#className#::class, $model);
+
     expect($model->getString())->toBe($attributes[#className#::ATTR_STRING]);
     expect($model->getText())->toBe($attributes[#className#::ATTR_TEXT]);
     expect($model->getInteger())->toBe($attributes[#className#::ATTR_INTEGER]);

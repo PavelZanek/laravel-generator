@@ -17,7 +17,11 @@ class Edit#className#Form extends Form
      */
     public array $formData = [];
 
-    public function setFormData(#className# $#camelModelNameSingular#)
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     */
+    public function setFormData(#className# $#camelModelNameSingular#): void
     {
         $this->formData = $#camelModelNameSingular#->toArray();
     }

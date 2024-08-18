@@ -6,11 +6,10 @@ namespace App\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#;
 
 use App\Enums\ExampleEnum;
 use App\Livewire\Forms\App#classNamespace##ucfirstCamelModelNamePlural#\Create#className#Form;
+use App\Models#classNamespace##className#;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 
 class Create#className#Component extends Component
 {
@@ -41,16 +40,17 @@ class Create#className#Component extends Component
     }
 
     /**
-     * @return \Illuminate\Http\RedirectResponse|\Livewire\Features\SupportRedirects\Redirector
+     * @return void
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function save(): Redirector|RedirectResponse
+    public function save(): void
     {
+        // $this->authorize('create', #className#::class);
+
         $this->form->store();
 
-        return redirect()->route('#sluggedModelNamePlural#.index')->with([
-            'flashType' => 'success',
-            'flashMessage' => __('#translationPath#.flash.created'),
-        ]);
+        session()->flash('flashType', 'success');
+        session()->flash('flashMessage', __('#translationPath#.flash.created'));
+        $this->redirectRoute('#sluggedModelNamePlural#.index', navigate: true);
     }
 }

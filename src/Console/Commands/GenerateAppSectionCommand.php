@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PavelZanek\LaravelGenerator\Console\Commands;
 
-use PavelZanek\LaravelGenerator\Enums\FrameworkEnum;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use PavelZanek\LaravelGenerator\Enums\FrameworkEnum;
 use PavelZanek\LaravelGenerator\Enums\TestingFrameworkEnum;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,7 +24,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
      *
      * @var string
      */
-    protected $signature = 'laravel-generator:app {class} {--framework=Laravel} {--compact} {--jetstream} {--factory} {--seeder} {--tests=PHPunit}';
+    protected $signature = 'laravel-generator:app {class} {--framework=Laravel} {--compact} {--jetstream} {--factory} {--seeder} {--policy} {--tests=PHPunit}';
 
     /**
      * The console command description.
@@ -56,7 +56,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
             default: $this->option('framework') // @phpstan-ignore-line
         ));
 
-        if($this->option('framework') == FrameworkEnum::LIVEWIRE->value) {
+        if ($this->option('framework') == FrameworkEnum::LIVEWIRE->value) {
             $input->setOption('compact', confirm(
                 label: 'Want to generate compact views (modals)?',
                 default: $this->option('compact') // @phpstan-ignore-line
@@ -78,6 +78,11 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
             default: $this->option('seeder') // @phpstan-ignore-line
         ));
 
+        $input->setOption('policy', confirm(
+            label: 'Want to create a Policy?',
+            default: $this->option('policy') // @phpstan-ignore-line
+        ));
+
         $input->setOption('tests', select(
             label: 'What testing framework do you want to use?',
             options: [TestingFrameworkEnum::PHPUNIT->value, TestingFrameworkEnum::PEST->value, 'Don\'t generate tests'],
@@ -87,17 +92,17 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
 
     /**
      * Execute the console command.
+     *
      * @throws \Throwable
      */
     public function handle(): int
     {
         $className = $this->argument('class');
-        $className = 'App\Models\FirstNamespace\SecondNamespace\ExampleItem'; // TODO
-        if (!str_contains($className, '\\')) {
-            $className = 'App\\Models\\' . $className;
+        if (! str_contains($className, '\\')) {
+            $className = 'App\\Models\\'.$className;
         }
-        if (!class_exists($className)) {
-            $this->fail('Class does not exist: "' . $className . '". Enter the name of the class (for example "Post") in the full form using double backslashes (for example "App\\\\Models\\\\Post")');
+        if (! class_exists($className)) {
+            $this->fail('Class does not exist: "'.$className.'". Enter the name of the class (for example "Post") in the full form using double backslashes (for example "App\\\\Models\\\\Post")');
         }
 
         /**
@@ -108,7 +113,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         $modelPluralName = Str::camel($model->getTable());
 
         $classNamespaceFull = Str::beforeLast($className, '\\');
-        $classNamespace = Str::afterLast($classNamespaceFull, 'App\\Models') . '\\';
+        $classNamespace = Str::afterLast($classNamespaceFull, 'App\\Models').'\\';
         if ($classNamespaceFull === 'App\\Models') {
             $classNamespace = '\\';
         }
@@ -123,6 +128,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
             'jetstreamCompatibility' => $this->option('jetstream'),
             'factory' => $this->option('factory'),
             'seeder' => $this->option('seeder'),
+            'policy' => $this->option('policy'),
             'tests' => $this->option('tests'),
             'replacement' => [
                 '#dbTableName#' => $model->getTable(),
@@ -142,9 +148,9 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
                 '#uppercaseModelNameSingular#' => \mb_strtoupper(Str::snake($modelName)),
                 '#sluggedModelNameSingular#' => Str::slug(Str::snake($modelName)),
 
-//                '#validationRules#' => $this->rulesArrayToString(
-//                    $this->generateValidationRules($model, $replacementClassName)
-//                ),
+                //                '#validationRules#' => $this->rulesArrayToString(
+                //                    $this->generateValidationRules($model, $replacementClassName)
+                //                ),
             ],
         ];
 
@@ -154,6 +160,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         //        "jetstreamCompatibility" => false
         //        "factory" => false
         //        "seeder" => false
+        //        "policy" => false
         //        "tests" => "PHPUnit
         //        "replacement" => array:13 [
         //            "#dbTableName#" => "example_items"
@@ -175,6 +182,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         //        "jetstreamCompatibility" => false
         //        "factory" => false
         //        "seeder" => false
+        //        "policy" => false
         //        "tests" => "PHPUnit
         //        "replacement" => array:14 [
         //            "#dbTableName#" => "users"
@@ -191,7 +199,6 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         //            "#camelModelNameSingular#" => "user"
         //            "#uppercaseModelNameSingular#" => "USER"
         //            "#sluggedModelNameSingular#" => "user"
-
 
         // Generate translation file
         $this->line('Generating translations');
@@ -210,11 +217,6 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
             $this->newLine();
         }
 
-        // Generate tables
-        //        $this->line('Generating table helper');
-        //        $this->generateTableHelperFiles($data);
-        //        $this->newLine();
-
         // Generate table settings
         $this->line('Generating table settings');
         $this->generateTableSettingsFile($data, $translationPath);
@@ -230,9 +232,8 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         $this->generateViewFiles($data, $translationPath);
         $this->newLine();
 
-
         // Generate Livewire component & view files
-        if($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
+        if ($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
             $this->line('Generating Livewire component files');
             $this->generateLivewireFiles($data, $translationPath);
             $this->newLine();
@@ -243,21 +244,28 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         }
 
         // Generate factory file
-        if($data['factory']) {
+        if ($data['factory']) {
             $this->line('Generating factory');
             $this->generateFactoryFile($data);
             $this->newLine();
         }
 
         // Generate seeder file
-        if($data['seeder']) {
+        if ($data['seeder']) {
             $this->line('Generating seeder');
             $this->generateSeederFile($data);
             $this->newLine();
         }
 
+        // Generate policy file
+        if ($data['policy']) {
+            $this->line('Generating policy');
+            $this->generatePolicyFile($data);
+            $this->newLine();
+        }
+
         // Generate test files
-        if(\in_array($data['tests'], [TestingFrameworkEnum::PHPUNIT->value, TestingFrameworkEnum::PEST->value])) {
+        if (\in_array($data['tests'], [TestingFrameworkEnum::PHPUNIT->value, TestingFrameworkEnum::PEST->value])) {
             $this->line('Generating tests');
             $this->generateTestFiles($data);
             $this->newLine();
@@ -274,8 +282,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return string
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateTranslationFile(array $data): string
     {
@@ -286,9 +293,10 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
 
         $translationPath = "app{$sluggedClassNamespace}{$sluggedModelNameSingular}-translations";
 
-        foreach($languages as $language) {
-            if(! \in_array($language, ['en', 'cs'])) {
+        foreach ($languages as $language) {
+            if (! \in_array($language, ['en', 'cs'])) {
                 $this->warn("Invalid translation language - $language, skipping.");
+
                 continue;
             }
 
@@ -304,8 +312,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateActionFiles(array $data): void
     {
@@ -326,9 +333,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $translationPath
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateRequestFiles(array $data, string $translationPath): void
     {
@@ -349,44 +354,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return void
-     */
-    protected function generateTableHelperFiles(array $data): void
-    {
-        $this->generateFile(
-            filePath: app_path(path: "Tables/Helpers/TableColumn.php"),
-            stubPath: $this->getStubPath(stub: "tables/TableColumn.php.stub"),
-            data: $data,
-            message: 'Generated table helper file',
-        );
-
-        $this->generateFile(
-            filePath: app_path(path: "Enums/TableFilters/FilterInputTypeEnum.php"),
-            stubPath: $this->getStubPath(stub: "enums/FilterInputTypeEnum.php.stub"),
-            data: $data,
-            message: 'Generated enum file',
-        );
-
-        $this->generateFile(
-            filePath: app_path(path: "Enums/TableFilters/FilterOperatorEnum.php"),
-            stubPath: $this->getStubPath(stub: "enums/FilterOperatorEnum.php.stub"),
-            data: $data,
-            message: 'Generated enum file',
-        );
-
-        $this->generateFile(
-            filePath: app_path(path: "Enums/TableFilters/FilterTypeEnum.php"),
-            stubPath: $this->getStubPath(stub: "enums/FilterTypeEnum.php.stub"),
-            data: $data,
-            message: 'Generated enum file',
-        );
-    }
-
-    /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $translationPath
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateTableSettingsFile(array $data, string $translationPath): void
     {
@@ -395,7 +363,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
 
         $this->generateFile(
             filePath: app_path(path: "Tables/App{$classNamespace}{$className}TableSettings.php"),
-            stubPath: $this->getStubPath(stub: "tables/TableSettings.php.stub"),
+            stubPath: $this->getStubPath(stub: 'tables/TableSettings.php.stub'),
             data: $data,
             message: 'Generated table settings file',
             arrayKeys: ['#translationPath#'],
@@ -404,28 +372,27 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $translationPath
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateControllerFile(array $data, string $translationPath): void
     {
         $classNamespace = $data['replacement']['#classNamespaceSlash#']; // @phpstan-ignore-line
         $className = $data['replacement']['#className#']; // @phpstan-ignore-line
 
-        if($data['framework'] === FrameworkEnum::LARAVEL->value) {
+        if ($data['framework'] === FrameworkEnum::LARAVEL->value) {
             $this->generateFile(
                 filePath: app_path(path: "Http/Controllers/App{$classNamespace}{$className}Controller.php"),
-                stubPath: $this->getStubPath(stub: "controllers/LaravelCrudController.php.stub"),
+                stubPath: $this->getStubPath(stub: 'controllers/LaravelCrudController.php.stub'),
                 data: $data,
                 message: 'Generated controller file',
                 arrayKeys: ['#translationPath#'],
                 arrayValues: [$translationPath],
             );
-        } elseif($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
+        } elseif ($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
+            $compact = $data['isCompact'] ? 'Compact' : '';
             $this->generateFile(
                 filePath: app_path(path: "Http/Controllers/App{$classNamespace}{$className}Controller.php"),
-                stubPath: $this->getStubPath(stub: "controllers/LivewireCrudController.php.stub"),
+                stubPath: $this->getStubPath(stub: 'controllers/'.$compact.'LivewireCrudController.php.stub'),
                 data: $data,
                 message: 'Generated controller file',
                 arrayKeys: ['#translationPath#'],
@@ -435,46 +402,100 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $translationPath
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateViewFiles(array $data, string $translationPath): void
     {
         $sluggedClassNamespace = $data['replacement']['#sluggedClassNamespace#']; // @phpstan-ignore-line
         $sluggedModelNamePlural = $data['replacement']['#sluggedModelNamePlural#']; // @phpstan-ignore-line
 
-        if($data['jetstreamCompatibility'] === false) {
+        if ($data['jetstreamCompatibility'] === false) {
             $this->generateFile(
-                filePath: app_path(path: "View/Components/AppLayout.php"),
-                stubPath: $this->getStubPath(stub: "views/layouts/AppLayout.php.stub"),
+                filePath: app_path(path: 'View/Components/AppLayout.php'),
+                stubPath: $this->getStubPath(stub: 'views/layouts/AppLayout.php.stub'),
                 data: $data,
                 message: 'Generated app layout component file',
             );
             $this->generateFile(
-                filePath: resource_path(path: "views/layouts/app.blade.php"),
-                stubPath: $this->getStubPath(stub: "views/layouts/app.blade.php.stub"),
+                filePath: resource_path(path: 'views/layouts/app.blade.php'),
+                stubPath: $this->getStubPath(stub: 'views/layouts/app.blade.php.stub'),
                 data: $data,
                 message: 'Generated app layout blade file',
             );
         }
 
-        foreach (['index.blade.php', 'create.blade.php', 'edit.blade.php'] as $template) {
-            if($data['framework'] === FrameworkEnum::LARAVEL->value) { // Laravel
+        if (\in_array($data['framework'], [FrameworkEnum::LARAVEL->value, FrameworkEnum::LIVEWIRE->value])) {
+            $framework = \strtolower($data['framework']); // @phpstan-ignore-line
+            if($data['framework'] === FrameworkEnum::LIVEWIRE->value && $data['isCompact']) {
                 $this->generateFile(
-                    filePath: resource_path(path: "views/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/{$template}"),
-                    stubPath: $this->getStubPath(stub: "views/laravel/{$template}.stub"),
+                    filePath: resource_path(path: "views/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/index.blade.php"),
+                    stubPath: $this->getStubPath(stub: "views/{$framework}/index-compact.blade.php.stub"),
                     data: $data,
                     message: 'Generated view file',
                     arrayKeys: ['#translationPath#'],
                     arrayValues: [$translationPath],
                 );
-            } elseif($data['framework'] === FrameworkEnum::LIVEWIRE->value) { // Livewire
+            } else {
+                foreach (['index.blade.php', 'create.blade.php', 'edit.blade.php'] as $template) {
+                    $this->generateFile(
+                        filePath: resource_path(path: "views/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/{$template}"),
+                        stubPath: $this->getStubPath(stub: "views/{$framework}/{$template}.stub"),
+                        data: $data,
+                        message: 'Generated view file',
+                        arrayKeys: ['#translationPath#'],
+                        arrayValues: [$translationPath],
+                    );
+                }
+            }
+        }
+
+    }
+
+    /**
+     * @param  array<string, string|bool|array<string, string>>  $data
+     */
+    protected function generateLivewireFiles(array $data, string $translationPath): void
+    {
+        $classNamespace = $data['replacement']['#classNamespaceSlash#']; // @phpstan-ignore-line
+        $className = $data['replacement']['#className#']; // @phpstan-ignore-line
+        $ucfirstCamelModelNamePlural = $data['replacement']['#ucfirstCamelModelNamePlural#']; // @phpstan-ignore-line
+
+        if($data['isCompact']) {
+            $this->generateFile(
+                filePath: app_path(path: "Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Manage{$className}Component.php"),
+                stubPath: $this->getStubPath(stub: "livewire/CompactManageComponent.php.stub"),
+                data: $data,
+                message: 'Generated Livewire component file',
+                arrayKeys: ['#translationPath#'],
+                arrayValues: [$translationPath],
+            );
+
+            $this->generateFile(
+                filePath: app_path(path: "Livewire/Forms/App{$classNamespace}{$ucfirstCamelModelNamePlural}/{$className}Form.php"),
+                stubPath: $this->getStubPath(stub: "livewire/forms/CompactForm.php.stub"),
+                data: $data,
+                message: 'Generated Livewire form file',
+                arrayKeys: ['#translationPath#'],
+                arrayValues: [$translationPath],
+            );
+        } else {
+            foreach (['Create', 'Edit', 'Manage'] as $componentType) {
                 $this->generateFile(
-                    filePath: resource_path(path: "views/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/{$template}"),
-                    stubPath: $this->getStubPath(stub: "views/livewire/{$template}.stub"),
+                    filePath: app_path(path: "Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/{$componentType}{$className}Component.php"),
+                    stubPath: $this->getStubPath(stub: "livewire/{$componentType}Component.php.stub"),
                     data: $data,
-                    message: 'Generated view file',
+                    message: 'Generated Livewire component file',
+                    arrayKeys: ['#translationPath#'],
+                    arrayValues: [$translationPath],
+                );
+            }
+
+            foreach (['Create', 'Edit'] as $formType) {
+                $this->generateFile(
+                    filePath: app_path(path: "Livewire/Forms/App{$classNamespace}{$ucfirstCamelModelNamePlural}/{$formType}{$className}Form.php"),
+                    stubPath: $this->getStubPath(stub: "livewire/forms/{$formType}Form.php.stub"),
+                    data: $data,
+                    message: 'Generated Livewire form file',
                     arrayKeys: ['#translationPath#'],
                     arrayValues: [$translationPath],
                 );
@@ -483,43 +504,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $translationPath
-     * @return void
-     */
-    protected function generateLivewireFiles(array $data, string $translationPath): void
-    {
-        $classNamespace = $data['replacement']['#classNamespaceSlash#']; // @phpstan-ignore-line
-        $className = $data['replacement']['#className#']; // @phpstan-ignore-line
-        $ucfirstCamelModelNamePlural = $data['replacement']['#ucfirstCamelModelNamePlural#']; // @phpstan-ignore-line
-
-        foreach (['Create', 'Edit', 'Manage'] as $componentType) {
-            $this->generateFile(
-                filePath: app_path(path: "Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/{$componentType}{$className}Component.php"),
-                stubPath: $this->getStubPath(stub: "livewire/{$componentType}Component.php.stub"),
-                data: $data,
-                message: 'Generated Livewire component file',
-                arrayKeys: ['#translationPath#'],
-                arrayValues: [$translationPath],
-            );
-        }
-
-        foreach (['Create', 'Edit'] as $formType) {
-            $this->generateFile(
-                filePath: app_path(path: "Livewire/Forms/App{$classNamespace}{$ucfirstCamelModelNamePlural}/{$formType}{$className}Form.php"),
-                stubPath: $this->getStubPath(stub: "livewire/forms/{$formType}Form.php.stub"),
-                data: $data,
-                message: 'Generated Livewire form file',
-                arrayKeys: ['#translationPath#'],
-                arrayValues: [$translationPath],
-            );
-        }
-    }
-
-    /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $translationPath
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateLivewireViewFiles(array $data, string $translationPath): void
     {
@@ -527,37 +512,47 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
         $sluggedModelNamePlural = $data['replacement']['#sluggedModelNamePlural#']; // @phpstan-ignore-line
         $sluggedModelNameSingular = $data['replacement']['#sluggedModelNameSingular#']; // @phpstan-ignore-line
 
-        $this->generateFile(
-            filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/create-{$sluggedModelNameSingular}-component.blade.php"),
-            stubPath: $this->getStubPath(stub: "views/livewire/components/create-component.blade.php.stub"),
-            data: $data,
-            message: 'Generated Livewire view file',
-            arrayKeys: ['#translationPath#'],
-            arrayValues: [$translationPath],
-        );
+        if($data['isCompact']) {
+            $this->generateFile(
+                filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/manage-{$sluggedModelNameSingular}-component.blade.php"),
+                stubPath: $this->getStubPath(stub: 'views/livewire/components/compact-manage-component.blade.php.stub'),
+                data: $data,
+                message: 'Generated Livewire view file',
+                arrayKeys: ['#translationPath#'],
+                arrayValues: [$translationPath],
+            );
+        } else {
+            $this->generateFile(
+                filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/create-{$sluggedModelNameSingular}-component.blade.php"),
+                stubPath: $this->getStubPath(stub: 'views/livewire/components/create-component.blade.php.stub'),
+                data: $data,
+                message: 'Generated Livewire view file',
+                arrayKeys: ['#translationPath#'],
+                arrayValues: [$translationPath],
+            );
 
-        $this->generateFile(
-            filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/edit-{$sluggedModelNameSingular}-component.blade.php"),
-            stubPath: $this->getStubPath(stub: "views/livewire/components/edit-component.blade.php.stub"),
-            data: $data,
-            message: 'Generated Livewire view file',
-            arrayKeys: ['#translationPath#'],
-            arrayValues: [$translationPath],
-        );
+            $this->generateFile(
+                filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/edit-{$sluggedModelNameSingular}-component.blade.php"),
+                stubPath: $this->getStubPath(stub: 'views/livewire/components/edit-component.blade.php.stub'),
+                data: $data,
+                message: 'Generated Livewire view file',
+                arrayKeys: ['#translationPath#'],
+                arrayValues: [$translationPath],
+            );
 
-        $this->generateFile(
-            filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/manage-{$sluggedModelNameSingular}-component.blade.php"),
-            stubPath: $this->getStubPath(stub: "views/livewire/components/manage-component.blade.php.stub"),
-            data: $data,
-            message: 'Generated Livewire view file',
-            arrayKeys: ['#translationPath#'],
-            arrayValues: [$translationPath],
-        );
+            $this->generateFile(
+                filePath: resource_path(path: "views/livewire/app{$sluggedClassNamespace}{$sluggedModelNamePlural}/manage-{$sluggedModelNameSingular}-component.blade.php"),
+                stubPath: $this->getStubPath(stub: 'views/livewire/components/manage-component.blade.php.stub'),
+                data: $data,
+                message: 'Generated Livewire view file',
+                arrayKeys: ['#translationPath#'],
+                arrayValues: [$translationPath],
+            );
+        }
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateFactoryFile(array $data): void
     {
@@ -566,15 +561,14 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
 
         $this->generateFile(
             filePath: database_path(path: "factories{$classNamespace}{$className}Factory.php"),
-            stubPath: $this->getStubPath(stub: "factories/ModelFactory.php.stub"),
+            stubPath: $this->getStubPath(stub: 'factories/ModelFactory.php.stub'),
             data: $data,
             message: 'Generated factory file',
         );
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateSeederFile(array $data): void
     {
@@ -583,15 +577,30 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
 
         $this->generateFile(
             filePath: database_path(path: "seeders{$classNamespace}{$className}Seeder.php"),
-            stubPath: $this->getStubPath("seeders/ModelSeeder.php.stub"),
+            stubPath: $this->getStubPath('seeders/ModelSeeder.php.stub'),
             data: $data,
             message: 'Generated seeder file',
         );
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
+     */
+    protected function generatePolicyFile(array $data): void
+    {
+        $classNamespace = $data['replacement']['#classNamespaceSlash#']; // @phpstan-ignore-line
+        $className = $data['replacement']['#className#']; // @phpstan-ignore-line
+
+        $this->generateFile(
+            filePath: app_path(path: "Policies/App{$classNamespace}{$className}Policy.php"),
+            stubPath: $this->getStubPath(stub: 'policies/Policy.php.stub'),
+            data: $data,
+            message: 'Generated policy file',
+        );
+    }
+
+    /**
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateTestFiles(array $data): void
     {
@@ -621,7 +630,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
             message: 'Generated test file',
         );
 
-        if($data['framework'] === FrameworkEnum::LARAVEL->value) {
+        if ($data['framework'] === FrameworkEnum::LARAVEL->value) {
             $this->generateFile(
                 filePath: base_path(path: "tests/Feature/Controllers/App{$classNamespace}{$className}ControllerTest.php"),
                 stubPath: $this->getStubPath(stub: "tests/controllers/LaravelCrudControllerTest{$pest}.php.stub"),
@@ -629,79 +638,91 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
                 message: 'Generated test file',
             );
         } elseif ($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
-            $this->generateFile(
-                filePath: base_path(path: "tests/Feature/Controllers/App{$classNamespace}{$className}ControllerTest.php"),
-                stubPath: $this->getStubPath(stub: "tests/controllers/LivewireCrudControllerTest{$pest}.php.stub"),
-                data: $data,
-                message: 'Generated test file',
-            );
+            if($data['isCompact']) {
+                $this->generateFile(
+                    filePath: base_path(path: "tests/Feature/Controllers/App{$classNamespace}{$className}ControllerTest.php"),
+                    stubPath: $this->getStubPath(stub: "tests/controllers/CompactLivewireCrudControllerTest{$pest}.php.stub"),
+                    data: $data,
+                    message: 'Generated test file',
+                );
 
-            $this->generateFile(
-                filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Manage{$className}ComponentTest.php"),
-                stubPath: $this->getStubPath(stub: "tests/livewire/ManageComponentTest{$pest}.php.stub"),
-                data: $data,
-                message: 'Generated test file',
-            );
+                $this->generateFile(
+                    filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Manage{$className}ComponentTest.php"),
+                    stubPath: $this->getStubPath(stub: "tests/livewire/CompactManageComponentTest{$pest}.php.stub"),
+                    data: $data,
+                    message: 'Generated test file',
+                );
+            } else {
+                $this->generateFile(
+                    filePath: base_path(path: "tests/Feature/Controllers/App{$classNamespace}{$className}ControllerTest.php"),
+                    stubPath: $this->getStubPath(stub: "tests/controllers/LivewireCrudControllerTest{$pest}.php.stub"),
+                    data: $data,
+                    message: 'Generated test file',
+                );
 
-            $this->generateFile(
-                filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Create{$className}ComponentTest.php"),
-                stubPath: $this->getStubPath(stub: "tests/livewire/CreateComponentTest{$pest}.php.stub"),
-                data: $data,
-                message: 'Generated test file',
-            );
+                $this->generateFile(
+                    filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Manage{$className}ComponentTest.php"),
+                    stubPath: $this->getStubPath(stub: "tests/livewire/ManageComponentTest{$pest}.php.stub"),
+                    data: $data,
+                    message: 'Generated test file',
+                );
 
-            $this->generateFile(
-                filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Edit{$className}ComponentTest.php"),
-                stubPath: $this->getStubPath(stub: "tests/livewire/EditComponentTest{$pest}.php.stub"),
-                data: $data,
-                message: 'Generated test file',
-            );
+                $this->generateFile(
+                    filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Create{$className}ComponentTest.php"),
+                    stubPath: $this->getStubPath(stub: "tests/livewire/CreateComponentTest{$pest}.php.stub"),
+                    data: $data,
+                    message: 'Generated test file',
+                );
+
+                $this->generateFile(
+                    filePath: base_path(path: "tests/Feature/Livewire/App{$classNamespace}{$ucfirstCamelModelNamePlural}/Edit{$className}ComponentTest.php"),
+                    stubPath: $this->getStubPath(stub: "tests/livewire/EditComponentTest{$pest}.php.stub"),
+                    data: $data,
+                    message: 'Generated test file',
+                );
+            }
         }
     }
 
     /**
-     * @param array<string, string|bool|array<string, string>> $data
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
      */
     protected function generateResourceRoute(array $data): void
     {
         $sluggedModelNamePlural = $data['replacement']['#sluggedModelNamePlural#']; // @phpstan-ignore-line
-        if(Route::has($sluggedModelNamePlural . '.index')) {
-            $this->warn("Routes already exist, skipping.");
+        if (Route::has($sluggedModelNamePlural.'.index')) {
+            $this->warn('Routes already exist, skipping.');
         } else {
-            if($data['framework'] === FrameworkEnum::LARAVEL->value) {
+            if ($data['framework'] === FrameworkEnum::LARAVEL->value) {
                 \file_put_contents(
-                    base_path("routes/web.php"),
+                    base_path('routes/web.php'),
                     Str::replace(
                         \array_keys($data['replacement']), // @phpstan-ignore-line
                         \array_values($data['replacement']), // @phpstan-ignore-line
-                        \file_get_contents($this->getStubPath("routes/routes.php.stub")) // @phpstan-ignore-line
+                        \file_get_contents($this->getStubPath('routes/routes.php.stub')) // @phpstan-ignore-line
                     ),
                     FILE_APPEND,
                 );
-            } elseif($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
+            } elseif ($data['framework'] === FrameworkEnum::LIVEWIRE->value) {
+                $compact = $data['isCompact'] ? '-compact' : '';
                 \file_put_contents(
-                    base_path("routes/web.php"),
+                    base_path('routes/web.php'),
                     Str::replace(
                         \array_keys($data['replacement']), // @phpstan-ignore-line
                         \array_values($data['replacement']), // @phpstan-ignore-line
-                        \file_get_contents($this->getStubPath("routes/routes-livewire.php.stub")) // @phpstan-ignore-line
+                        \file_get_contents($this->getStubPath('routes/routes-livewire'.$compact.'.php.stub')) // @phpstan-ignore-line
                     ),
                     FILE_APPEND,
                 );
             }
-            $this->info("Added resource route to web.php.");
+            $this->info('Added resource route to web.php.');
         }
     }
 
     /**
-     * @param string $filePath
-     * @param string $stubPath
-     * @param array<string, string|bool|array<string, string>> $data
-     * @param string $message
-     * @param array<array-key, string> $arrayKeys
-     * @param array<array-key, string> $arrayValues
-     * @return void
+     * @param  array<string, string|bool|array<string, string>>  $data
+     * @param  array<array-key, string>  $arrayKeys
+     * @param  array<array-key, string>  $arrayValues
      */
     private function generateFile(
         string $filePath,
@@ -713,7 +734,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     ): void {
         @mkdir(dirname($filePath), 0755, true);
 
-        if(! $this->checkAndInformIfFileExists($filePath)) {
+        if (! $this->checkAndInformIfFileExists($filePath)) {
             \file_put_contents(
                 $filePath,
                 Str::replace(
@@ -727,8 +748,6 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     }
 
     /**
-     * Check if a file exists and inform if it does.
-     *
      * @param string $filePath
      * @return bool
      */
@@ -736,6 +755,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
     {
         if (\file_exists($filePath)) {
             $this->warn("File already exists - $filePath, skipping.");
+
             return true;
         }
 
@@ -753,8 +773,7 @@ final class GenerateAppSectionCommand extends Command implements PromptsForMissi
             return $customStubPath;
         }
 
-        return __DIR__ . "/../../../stubs/{$stub}"; // development
-        //        return base_path("vendor/pavelzanek/laravel-generator/stubs/{$stub}"); // production
+        return base_path("vendor/pavelzanek/laravel-generator/stubs/{$stub}");
     }
 
     //    /**

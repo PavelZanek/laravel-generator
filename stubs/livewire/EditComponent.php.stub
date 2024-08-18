@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#;
 
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
 use App\Enums\ExampleEnum;
 use App\Livewire\Forms\App#classNamespace##ucfirstCamelModelNamePlural#\Edit#className#Form;
 use App\Models#classNamespace##className#;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 
 class Edit#className#Component extends Component
 {
@@ -29,6 +28,11 @@ class Edit#className#Component extends Component
      * @var \Illuminate\Support\Collection
      */
     public Collection $exampleEnums;
+
+    /**
+     * @var bool|int
+     */
+    public bool|int $confirmingItemDeletion = false;
 
     /**
      * @return void
@@ -49,16 +53,41 @@ class Edit#className#Component extends Component
     }
 
     /**
-     * @return \Illuminate\Http\RedirectResponse|\Livewire\Features\SupportRedirects\Redirector
+     * @return void
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function save(): Redirector|RedirectResponse
+    public function save(): void
     {
+        // $this->authorize('update', $this->#camelModelNameSingular#);
+
         $this->form->update($this->#camelModelNameSingular#);
 
-        return redirect()->route('#sluggedModelNamePlural#.index')->with([
-            'flashType' => 'success',
-            'flashMessage' => __('#translationPath#.flash.updated'),
-        ]);
+        session()->flash('flashType', 'success');
+        session()->flash('flashMessage', __('#translationPath#.flash.updated'));
+        $this->redirectRoute('#sluggedModelNamePlural#.index', navigate: true);
+    }
+
+    /**
+     * @param bool|int $id
+     * @return void
+     */
+    public function confirmItemDeletion(bool|int $id): void
+    {
+        $this->confirmingItemDeletion = $id;
+    }
+
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     */
+    public function deleteItem(#className# $#camelModelNameSingular#): void
+    {
+        // $this->authorize('delete', $#camelModelNameSingular#);
+
+        (new Delete#className#Action())->execute($#camelModelNameSingular#);
+
+        session()->flash('flashType', 'success');
+        session()->flash('flashMessage', __('#translationPath#.flash.deleted'));
+        $this->redirectRoute('#sluggedModelNamePlural#.index', navigate: true);
     }
 }

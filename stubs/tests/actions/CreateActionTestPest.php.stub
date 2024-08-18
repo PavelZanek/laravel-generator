@@ -20,6 +20,8 @@ it('can create a record', function () {
 
     $model = (new Create#className#Action())->execute($attributes);
 
+    $this->assertInstanceOf(#className#::class, $model);
+
     expect($model->getString())->toBe($attributes[#className#::ATTR_STRING]);
     expect($model->getText())->toBe($attributes[#className#::ATTR_TEXT]);
     expect($model->getInteger())->toBe($attributes[#className#::ATTR_INTEGER]);

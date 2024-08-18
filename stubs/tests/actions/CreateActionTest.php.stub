@@ -29,6 +29,8 @@ class Create#className#ActionTest extends TestCase
 
         $model = (new Create#className#Action())->execute($attributes);
 
+        $this->assertInstanceOf(#className#::class, $model);
+
         $this->assertNotNull($model->getString());
         $this->assertEquals($attributes[#className#::ATTR_STRING], $model->getString());
         $this->assertNotNull($model->getText());

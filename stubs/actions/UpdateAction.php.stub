@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#;
 
 use App\Models#classNamespace##className#;
+use Illuminate\Support\Facades\DB;
 
 class #actionType##className#Action
 {
@@ -15,7 +16,10 @@ class #actionType##className#Action
      */
     public function execute(#className# $#camelModelNameSingular#, array $data): #className#
     {
-        $#camelModelNameSingular#->update($data);
+        DB::transaction(function () use ($#camelModelNameSingular#, $data) {
+            $#camelModelNameSingular#->update($data);
+        });
+
         return $#camelModelNameSingular#;
     }
 }

@@ -27,7 +27,7 @@ final readonly class #className#TableSettings
                filterType: FilterTypeEnum::INPUT,
                filterInputType: FilterInputTypeEnum::NUMBER,
                value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getId(),
-               wrapper: fn(#className# $#camelModelNameSingular#, mixed $value): string => '<a href="' . route('#sluggedModelNamePlural#.edit', $#camelModelNameSingular#->getId()) . '" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">' . $value . '</a>',
+               // wrapper: fn(#className# $#camelModelNameSingular#, mixed $value): string => '<a href="' . route('#sluggedModelNamePlural#.edit', $#camelModelNameSingular#->getId()) . '" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">' . $value . '</a>',
            ),
            'string' => new TableColumn(
                name: __('#translationPath#.table.header.string'),
@@ -42,7 +42,7 @@ final readonly class #className#TableSettings
                name: __('#translationPath#.table.header.integer'),
                isSortable: true,
                isFilterable: true,
-               filterOperator: FilterOperatorEnum::EQUAL,
+               filterOperator: FilterOperatorEnum::GTE,
                filterType: FilterTypeEnum::INPUT,
                filterInputType: FilterInputTypeEnum::NUMBER,
                value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getInteger(),
@@ -55,12 +55,12 @@ final readonly class #className#TableSettings
                filterType: FilterTypeEnum::SELECT,
                filterSelectValues: [
                   'not_set' => __('---'),
-                  '1' => __('app/first-namespace/second-namespace/example-item-translations.table.body.label_yes'),
-                  '0' => __('app/first-namespace/second-namespace/example-item-translations.table.body.label_no'),
+                  '1' => __('#translationPath#.table.body.label_yes'),
+                  '0' => __('#translationPath#.table.body.label_no'),
               ],
                value: fn(#className# $#camelModelNameSingular#): string => $#camelModelNameSingular#->getBoolean()
-                    ? __('app/first-namespace/second-namespace/example-item-translations.table.body.label_yes')
-                    : __('app/first-namespace/second-namespace/example-item-translations.table.body.label_no'),
+                    ? __('#translationPath#.table.body.label_yes')
+                    : __('#translationPath#.table.body.label_no'),
            ),
            'enum' => new TableColumn(
                name: __('#translationPath#.table.header.enum'),
@@ -78,7 +78,7 @@ final readonly class #className#TableSettings
                filterOperator: FilterOperatorEnum::LIKE,
                filterType: FilterTypeEnum::INPUT,
                filterInputType: FilterInputTypeEnum::DATE,
-               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getCreatedAt()?->format('Y-m-d H:i'),
+               value: fn(#className# $#camelModelNameSingular#) => $#camelModelNameSingular#->getCreatedAt()->format('Y-m-d H:i'),
            ),
            'updated_at' => new TableColumn(
                name: __('#translationPath#.table.header.updated_at'),

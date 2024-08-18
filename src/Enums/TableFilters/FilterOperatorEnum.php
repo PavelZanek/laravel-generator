@@ -6,6 +6,10 @@ namespace PavelZanek\LaravelGenerator\Enums\TableFilters;
 
 enum FilterOperatorEnum: string
 {
-    case EQUAL = 'equal';
+    case EQUAL = '=';
     case LIKE = 'like';
+    case GT = '>';
+    case GTE = '>=';
+    case LT = '<';
+    case LTE = '<=';
 }

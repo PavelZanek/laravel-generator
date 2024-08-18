@@ -1,0 +1,25 @@
+<x-app-layout>
+    @section('pageTitle')
+        {{ __('#translationPath#.index.title') }}
+    @endsection
+    @section('metaDesc')
+        {{ __('#translationPath#.index.meta_description') }}
+    @endsection
+
+    <x-slot name="header">
+        <h1 class="font-semibold text-xl text-neutral-800 dark:text-neutral-50 leading-tight">
+            {{ __('#translationPath#.index.headline') }}
+        </h1>
+    </x-slot>
+
+    <!-- Index -->
+    <div class="py-6">
+        <div class="mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white rounded-lg dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
+
+                <livewire:app#dottedClassNamespace##sluggedModelNamePlural#.manage-#sluggedModelNameSingular#-component />
+
+            </div>
+        </div>
+    </div>
+</x-app-layout>

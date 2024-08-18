@@ -1,0 +1,204 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\App#classNamespace##ucfirstCamelModelNamePlural#;
+
+use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#className#Action;
+use App\Enums\ExampleEnum;
+use App\Livewire\Forms\App#classNamespace##ucfirstCamelModelNamePlural#\#className#Form;
+use App\Models#classNamespace##className#;
+use App\Tables\App#classNamespace##className#TableSettings;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Livewire\Component;
+use Livewire\WithPagination;
+use PavelZanek\LaravelGenerator\Services\FilterService;
+
+class Manage#className#Component extends Component
+{
+    use WithPagination;
+
+    /**
+     * @var \App\Livewire\Forms\App#classNamespace##ucfirstCamelModelNamePlural#\#className#Form
+     */
+    public #className#Form $form;
+
+    /**
+     * @var \Illuminate\Support\Collection
+     */
+    public Collection $exampleEnums;
+
+    /**
+     * @var string
+     */
+    public string $sortColumn = #className#::ATTR_CREATED_AT;
+
+    /**
+     * @var string
+     */
+    public string $sortDirection = 'desc';
+
+    /**
+     * @var array<array-key, mixed>
+     */
+    public array $filters = [];
+
+    /**
+     * @var int|bool
+     */
+    public int|bool $confirmingItemManage = false;
+
+    /**
+     * @var bool|int
+     */
+    public bool|int $confirmingItemDeletion = false;
+
+    /**
+     * @var array<string, array<string, mixed>>
+     */
+    protected $queryString = [
+        'sortColumn' => ['except' => #className#::ATTR_CREATED_AT],
+        'sortDirection' => ['except' => 'desc'],
+        'filters' => ['except' => []]
+    ];
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return void
+     */
+    public function mount(Request $request): void
+    {
+        $this->exampleEnums = ExampleEnum::all();
+        $this->sortColumn = $request->get('sort', #className#::ATTR_CREATED_AT);
+        $this->sortDirection = $request->get('direction', 'desc');
+        $this->filters = $request->get('filters', []);
+    }
+
+    /**
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function render(): View
+    {
+        $tableColumns = #className#TableSettings::getTableColumns();
+
+        $#camelModelNamePlural# = #className#::query()
+            ->when($this->filters, function ($query) use ($tableColumns) {
+                (new FilterService())->applyFilters($query, $this->filters, $tableColumns);
+            })
+            ->orderBy($this->sortColumn, $this->sortDirection)
+            ->paginate(20);
+
+        return view('livewire.app#dottedClassNamespace##sluggedModelNamePlural#.manage-#sluggedModelNameSingular#-component', [
+            '#camelModelNamePlural#' => $#camelModelNamePlural#,
+            'sortColumn' => $this->sortColumn,
+            'sortDirection' => $this->sortDirection,
+            'filters' => $this->filters,
+            'tableColumns' => $tableColumns,
+        ]);
+    }
+
+    /**
+     * @return void
+     */
+    public function updatingFilters(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * @param string $column
+     * @return void
+     */
+    public function sortBy(string $column): void
+    {
+        if ($this->sortColumn === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortColumn = $column;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    /**
+     * @return void
+     */
+    public function resetFilters(): void
+    {
+        $this->filters = [];
+    }
+
+    /**
+     * @return void
+     */
+    public function confirmItemAdd(): void
+    {
+        $this->resetErrorBag();
+        $this->form->setFormData();
+        $this->confirmingItemManage = true;
+    }
+
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     */
+    public function confirmItemEdit(#className# $#camelModelNameSingular#): void
+    {
+        $this->resetErrorBag();
+        $this->form->setFormData($#camelModelNameSingular#);
+        $this->confirmingItemManage = $#camelModelNameSingular#->getId();
+    }
+
+    /**
+     * @return void
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function saveItem(): void
+    {
+        $#camelModelNameSingular# = \is_bool($this->confirmingItemManage)
+            ? null
+            : #className#::query()->find($this->confirmingItemManage);
+
+        // if($#camelModelNameSingular#) {
+        //    $this->authorize('update', $#camelModelNameSingular#);
+        // } else {
+        //    $this->authorize('create', #className#::class);
+        // }
+
+        $this->form->save($#camelModelNameSingular#);
+
+        session()->flash('flashType', 'success');
+        if($#camelModelNameSingular#) {
+            session()->flash('flashMessage', __('#translationPath#.flash.updated'));
+        } else {
+            session()->flash('flashMessage', __('#translationPath#.flash.created'));
+        }
+        $this->redirectRoute('#sluggedModelNamePlural#.index', navigate: true);
+    }
+
+    /**
+     * @param bool|int $id
+     * @return void
+     */
+    public function confirmItemDeletion(bool|int $id): void
+    {
+        $this->confirmingItemDeletion = $id;
+    }
+
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     */
+    public function deleteItem(#className# $#camelModelNameSingular#): void
+    {
+        // $this->authorize('delete', $#camelModelNameSingular#);
+
+        (new Delete#className#Action())->execute($#camelModelNameSingular#);
+
+        session()->flash('flashType', 'success');
+        session()->flash('flashMessage', __('#translationPath#.flash.deleted'));
+        $this->redirectRoute('#sluggedModelNamePlural#.index', navigate: true);
+    }
+}

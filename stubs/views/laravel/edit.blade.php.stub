@@ -7,9 +7,22 @@
     @endsection
 
     <x-slot name="header">
-        <h1 class="font-semibold text-xl text-neutral-800 dark:text-neutral-50 leading-tight">
-            {{ __('#translationPath#.edit.headline') }} - {{ $#camelModelNameSingular#->getId() }}
-        </h1>
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="font-semibold text-xl text-neutral-800 dark:text-neutral-50 leading-tight">
+                    {{ __('#translationPath#.edit.headline') }}
+                </h1>
+            </div>
+            <div class="ml-2">
+                <form action="{{ route('#sluggedModelNamePlural#.destroy', $#camelModelNameSingular#->getId()) }}" method="POST" onsubmit="return confirm('{{ __('#translationPath#.index.delete_confirm') }}');">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <x-laravel-generator::buttons.danger-button type="submit">
+                        {{ __('#translationPath#.button.delete') }}
+                    </x-laravel-generator::buttons.danger-button>
+                </form>
+            </div>
+        </div>
     </x-slot>
 
     <!-- Edit Form -->
@@ -18,9 +31,55 @@
             <div class="bg-white rounded-lg dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
 
                 <div class="w-full px-6 py-4">
-                    <form method="POST" action="{{ route('#sluggedModelNamePlural#.update', $#camelModelNameSingular#->id) }}">
+                    <form method="POST" action="{{ route('#sluggedModelNamePlural#.update', $#camelModelNameSingular#->getId()) }}">
                         @csrf
                         @method('PUT')
+
+                        <div class="grid grid-col-1 md:grid-cols-2 gap-4">
+                            <!-- String -->
+                            <div>
+                                <x-laravel-generator::forms.label for="string" value="{{ __('#translationPath#.form.label.string') }} *" />
+                                <x-laravel-generator::forms.input id="string" type="text" name="string" value="{{ old('string', $#camelModelNameSingular#->getString()) }}" class="mt-1" />
+                                <x-laravel-generator::forms.input-error for="string" class="mt-2" />
+                            </div>
+
+                            <!-- Integer -->
+                            <div>
+                                <x-laravel-generator::forms.label for="integer" value="{{ __('#translationPath#.form.label.integer') }}" />
+                                <x-laravel-generator::forms.input id="integer" type="number" name="integer" value="{{ old('integer', $#camelModelNameSingular#->getInteger()) class="mt-1" />
+                                <x-laravel-generator::forms.input-error for="integer" class="mt-2" />
+                            </div>
+                        </div>
+
+                        <!-- Text -->
+                        <div class="mt-4">
+                            <x-laravel-generator::forms.label for="text" value="{{ __('#translationPath#.form.label.text') }}" />
+                            <x-laravel-generator::forms.textarea id="text" name="text" class="mt-1" />
+                            <x-laravel-generator::forms.input-error for="text" class="mt-2" />
+                        </div>
+
+                        <!-- Boolean -->
+                        <div class="mt-4">
+                            <div class="flex items-center mb-4">
+                                <x-laravel-generator::forms.checkbox id="boolean" name="boolean" {{ $#camelModelNameSingular#->getBoolean() ? 'checked' : ''}} />
+                                <x-laravel-generator::forms.label for="boolean" value="{{ __('#translationPath#.form.label.boolean') }}" class="ml-2" />
+                            </div>
+                            <x-laravel-generator::forms.input-error for="boolean" class="mt-2" />
+                        </div>
+
+                        <!-- Enum -->
+                        <div class="mt-4">
+                            <x-laravel-generator::forms.label for="enum" value="{{ __('#translationPath#.form.label.enum') }}" />
+                            <x-laravel-generator::forms.select id="enum"
+                                name="enum"
+                                :options="$exampleEnums->prepend(
+                                    ['name' => __('#translationPath#.form.value.select_enum'), 'value' => ''], 'preselect'
+                                )"
+                                :selected="$#camelModelNameSingular#->getEnum()?->value"
+                                class="mt-1"
+                            />
+                            <x-laravel-generator::forms.input-error for="enum" class="mt-2" />
+                        </div>
 
                         <!-- String -->
                         <div>
@@ -105,11 +164,10 @@
                             @enderror
                         </div>
 
-                        <div class="flex items-center justify-start mt-4">
-                            <button type="submit"
-                                class="transition-all ease-in-out duration-500 inline-flex items-center px-6 py-2 text-sm font-semibold rounded-md text-blue-100 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300">
+                        <div class="flex items-center justify-between mt-4">
+                            <x-laravel-generator::buttons.button type="submit">
                                 {{ __('#translationPath#.button.save') }}
-                            </button>
+                            </x-laravel-generator::buttons.button>
                         </div>
 
                     </form>

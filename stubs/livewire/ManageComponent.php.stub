@@ -8,12 +8,10 @@ use App\Actions\App#classNamespace##ucfirstCamelModelNamePlural#\Delete#classNam
 use App\Models#classNamespace##className#;
 use App\Tables\App#classNamespace##className#TableSettings;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 use Livewire\WithPagination;
-use PavelZanek\LaravelGenerator\Enums\TableFilters\FilterTypeEnum;
+use PavelZanek\LaravelGenerator\Services\FilterService;
 
 class Manage#className#Component extends Component
 {
@@ -22,7 +20,7 @@ class Manage#className#Component extends Component
     /**
      * @var string
      */
-    public string $sortColumn = 'created_at';
+    public string $sortColumn = #className#::ATTR_CREATED_AT;
 
     /**
      * @var string
@@ -33,6 +31,11 @@ class Manage#className#Component extends Component
      * @var array<array-key, mixed>
      */
     public array $filters = [];
+
+    /**
+     * @var bool|int
+     */
+    public bool|int $confirmingItemDeletion = false;
 
     /**
      * @var array<string, array<string, mixed>>
@@ -49,7 +52,7 @@ class Manage#className#Component extends Component
      */
     public function mount(Request $request): void
     {
-        $this->sortColumn = $request->get('sort', 'created_at');
+        $this->sortColumn = $request->get('sort', #className#::ATTR_CREATED_AT);
         $this->sortDirection = $request->get('direction', 'desc');
         $this->filters = $request->get('filters', []);
     }
@@ -62,24 +65,8 @@ class Manage#className#Component extends Component
         $tableColumns = #className#TableSettings::getTableColumns();
 
         $#camelModelNamePlural# = #className#::query()
-            ->when($this->filters, function ($query, $filters) use ($tableColumns) {
-                foreach ($filters as $column => $value) {
-                    if ($value !== null && $value !== '') {
-                        $tableColumn = $tableColumns[$column];
-                        $operator = $tableColumn->getFilterOperator()?->value === 'equal' ? '=' : 'like';
-
-                        if (
-                            $tableColumn->getFilterType()?->value === FilterTypeEnum::SELECT->value
-                            && $tableColumn->getFilterSelectValues()
-                        ) {
-                            $value = $value === 'not_set' ? null : $value;
-                        }
-
-                        if ($value !== null) {
-                            $query->where($column, $operator, $operator === 'like' ? "%{$value}%" : $value);
-                        }
-                    }
-                }
+            ->when($this->filters, function ($query) use ($tableColumns) {
+                (new FilterService())->applyFilters($query, $this->filters, $tableColumns);
             })
             ->orderBy($this->sortColumn, $this->sortDirection)
             ->paginate(20);
@@ -125,16 +112,26 @@ class Manage#className#Component extends Component
     }
 
     /**
-     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
-     * @return \Illuminate\Http\RedirectResponse|\Livewire\Features\SupportRedirects\Redirector
+     * @param bool|int $id
+     * @return void
      */
-    public function deleteItem(#className# $#camelModelNameSingular#): Redirector|RedirectResponse
+    public function confirmItemDeletion(bool|int $id): void
     {
+        $this->confirmingItemDeletion = $id;
+    }
+
+    /**
+     * @param \App\Models#classNamespace##className# $#camelModelNameSingular#
+     * @return void
+     */
+    public function deleteItem(#className# $#camelModelNameSingular#): void
+    {
+        // $this->authorize('delete', $#camelModelNameSingular#);
+
         (new Delete#className#Action())->execute($#camelModelNameSingular#);
 
-        return redirect()->route('#sluggedModelNamePlural#.index')->with([
-            'flashType' => 'success',
-            'flashMessage' => __('#translationPath#.flash.deleted'),
-        ]);
+        session()->flash('flashType', 'success');
+        session()->flash('flashMessage', __('#translationPath#.flash.deleted'));
+        $this->redirectRoute('#sluggedModelNamePlural#.index', navigate: true);
     }
 }

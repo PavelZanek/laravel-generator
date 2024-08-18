@@ -16,7 +16,8 @@ use App\Tables\App#classNamespace##className#TableSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use PavelZanek\LaravelGenerator\Enums\TableFilters\FilterTypeEnum;
+use Illuminate\Support\Facades\Gate;
+use PavelZanek\LaravelGenerator\Services\FilterService;
 
 class #className#Controller extends Controller
 {
@@ -26,30 +27,16 @@ class #className#Controller extends Controller
      */
     public function index(Request $request): View
     {
-        $sortColumn = $request->get('sort', 'created_at');
+        // Gate::authorize('viewAny', #className#::class);
+
+        $sortColumn = $request->get('sort', #className#::ATTR_CREATED_AT);
         $sortDirection = $request->get('direction', 'desc');
         $filters = $request->get('filters', []);
         $tableColumns = #className#TableSettings::getTableColumns();
 
         $#camelModelNamePlural# = #className#::query()
-            ->when($filters, function ($query, $filters) use ($tableColumns) {
-                foreach ($filters as $column => $value) {
-                    if ($value !== null && $value !== '') {
-                        $tableColumn = $tableColumns[$column];
-                        $operator = $tableColumn->getFilterOperator()?->value === 'equal' ? '=' : 'like';
-
-                        if (
-                            $tableColumn->getFilterType()?->value === FilterTypeEnum::SELECT->value
-                            && $tableColumn->getFilterSelectValues()
-                        ) {
-                            $value = $value === 'not_set' ? null : $value;
-                        }
-
-                        if ($value !== null) {
-                            $query->where($column, $operator, $operator === 'like' ? "%{$value}%" : $value);
-                        }
-                    }
-                }
+            ->when($filters, function ($query) use ($filters, $tableColumns) {
+                (new FilterService())->applyFilters($query, $filters, $tableColumns);
             })
             ->orderBy($sortColumn, $sortDirection)
             ->paginate(20);
@@ -68,6 +55,8 @@ class #className#Controller extends Controller
      */
     public function create(): View
     {
+        // Gate::authorize('create', #className#::class);
+
         return view('app#dottedClassNamespace##sluggedModelNamePlural#.create', [
             'exampleEnums' => ExampleEnum::all(),
         ]);
@@ -80,6 +69,8 @@ class #className#Controller extends Controller
      */
     public function store(Store#className#Request $request, Create#className#Action $action): RedirectResponse
     {
+        // Gate::authorize('create', #className#::class);
+
         $action->execute(
             \array_merge($request->validated(), ['boolean' => $request->has('boolean')])
         );
@@ -107,6 +98,8 @@ class #className#Controller extends Controller
      */
     public function edit(#className# $#camelModelNameSingular#): View
     {
+        // Gate::authorize('update', $#camelModelNameSingular#);
+
         return view('app#dottedClassNamespace##sluggedModelNamePlural#.edit', [
             '#camelModelNameSingular#' => $#camelModelNameSingular#,
             'exampleEnums' => ExampleEnum::all(),
@@ -121,6 +114,8 @@ class #className#Controller extends Controller
      */
     public function update(Update#className#Request $request, Update#className#Action $action, #className# $#camelModelNameSingular#): RedirectResponse
     {
+        // Gate::authorize('update', $#camelModelNameSingular#);
+
         $action->execute(
             $#camelModelNameSingular#,
             \array_merge($request->validated(), ['boolean' => $request->has('boolean')])
@@ -139,6 +134,8 @@ class #className#Controller extends Controller
      */
     public function destroy(Delete#className#Action $action, #className# $#camelModelNameSingular#): RedirectResponse
     {
+        // Gate::authorize('delete', $#camelModelNameSingular#);
+
         $action->execute($#camelModelNameSingular#);
 
         return redirect()->route('#sluggedModelNamePlural#.index')->with([

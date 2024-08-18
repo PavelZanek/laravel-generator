@@ -1,0 +1,118 @@
+<div id="paginated-records" class="">
+
+    <div class="mt-5 mb-2 mx-2 md:mx-6 flex justify-between items-center">
+        <div>
+        </div>
+        <div class="ml-2">
+            <x-laravel-generator::buttons.button wire:click="confirmItemAdd()" wire:loading.attr="disabled">
+                {{ __('#translationPath#.button.add') }}
+            </x-laravel-generator::buttons.button>
+        </div>
+    </div>
+
+    <div class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            @include('laravel-generator::app.shared.tables.livewire.table-head', [
+                'button' => [
+                    // 'filter' => __('#translationPath#.button.filter'),
+                    'reset_filter' => __('#translationPath#.button.reset_filter'),
+                ],
+            ])
+            @include('laravel-generator::app.shared.tables.livewire.table-body-compact', [
+                'records' => $#camelModelNamePlural#,
+                'button' => [
+                    'edit' => __('#translationPath#.button.edit'),
+                    'delete' => __('#translationPath#.button.delete'),
+                ],
+            ])
+        </table>
+    </div>
+
+    <div class="mt-5 mb-2 mx-3">
+        {!! $#camelModelNamePlural#->withQueryString()->links(data: ['scrollTo' => '#paginated-records']) !!}
+    </div>
+
+    <x-laravel-generator::modals.dialog-modal wire:model="confirmingItemManage">
+        <x-slot name="title">
+            {{ isset($this->form->formData['id']) ? __('#translationPath#.edit.headline') : __('#translationPath#.create.headline') }}
+        </x-slot>
+
+        <x-slot name="content">
+            <div class="grid grid-col-1 md:grid-cols-2 gap-4">
+                <!-- String -->
+                <div>
+                    <x-laravel-generator::forms.label for="string" value="{{ __('#translationPath#.form.label.string') }} *" />
+                    <x-laravel-generator::forms.input id="string" type="text" wire:model="form.formData.string" class="mt-1" />
+                    <x-laravel-generator::forms.input-error for="form.formData.string" class="mt-2" />
+                </div>
+
+                <!-- Integer -->
+                <div>
+                    <x-laravel-generator::forms.label for="integer" value="{{ __('#translationPath#.form.label.integer') }}" />
+                    <x-laravel-generator::forms.input id="integer" type="number" wire:model="form.formData.integer" class="mt-1" />
+                    <x-laravel-generator::forms.input-error for="form.formData.integer" class="mt-2" />
+                </div>
+            </div>
+
+            <!-- Text -->
+            <div class="mt-4">
+                <x-laravel-generator::forms.label for="text" value="{{ __('#translationPath#.form.label.text') }}" />
+                <x-laravel-generator::forms.textarea id="text" wire:model="form.formData.text" class="mt-1" />
+                <x-laravel-generator::forms.input-error for="form.formData.text" class="mt-2" />
+            </div>
+
+            <!-- Boolean -->
+            <div class="mt-4">
+                <div class="flex items-center mb-4">
+                    <x-laravel-generator::forms.checkbox id="boolean" wire:model="form.formData.boolean" />
+                    <x-laravel-generator::forms.label for="boolean" value="{{ __('#translationPath#.form.label.boolean') }}" class="ml-2" />
+                </div>
+                <x-laravel-generator::forms.input-error for="form.formData.boolean" class="mt-2" />
+            </div>
+
+            <!-- Enum -->
+            <div class="mt-4">
+                <x-laravel-generator::forms.label for="enum" value="{{ __('#translationPath#.form.label.enum') }}" />
+                <x-laravel-generator::forms.select id="enum"
+                    wire:model="form.formData.enum"
+                    :options="$exampleEnums->prepend(
+                        ['name' => __('#translationPath#.form.value.select_enum'), 'value' => ''], 'preselect'
+                    )"
+                    class="mt-1"
+                />
+                <x-laravel-generator::forms.input-error for="form.formData.enum" class="mt-2" />
+            </div>
+        </x-slot>
+
+        <x-slot name="footer">
+            <x-laravel-generator::buttons.secondary-button wire:click="$set('confirmingItemManage', false)" wire:loading.attr="disabled">
+                {{ __('#translationPath#.button.cancel') }}
+            </x-laravel-generator::buttons.secondary-button>
+
+            <x-laravel-generator::buttons.button class="ml-2" wire:click="saveItem" wire:loading.attr="disabled">
+                {{ __('#translationPath#.button.save') }}
+            </x-laravel-generator::buttons.button>
+        </x-slot>
+    </x-laravel-generator::modals.dialog-modal>
+
+    <x-laravel-generator::modals.confirmation-modal wire:model="confirmingItemDeletion">
+        <x-slot name="title">
+            {{ __('#translationPath#.button.delete') }}
+        </x-slot>
+
+        <x-slot name="content">
+            {{ __('#translationPath#.index.delete_confirm') }}
+        </x-slot>
+
+        <x-slot name="footer">
+            <x-laravel-generator::buttons.secondary-button wire:click="$set('confirmingItemDeletion', false)" wire:loading.attr="disabled">
+                {{ __('#translationPath#.button.cancel') }}
+            </x-laravel-generator::buttons.secondary-button>
+
+            <x-laravel-generator::buttons.danger-button class="ml-2" wire:click="deleteItem({{ $confirmingItemDeletion }})" wire:loading.attr="disabled">
+                {{ __('#translationPath#.button.delete') }}
+            </x-laravel-generator::buttons.danger-button>
+        </x-slot>
+    </x-laravel-generator::modals.confirmation-modal>
+
+</div>
